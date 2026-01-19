@@ -1,0 +1,74 @@
+# CSE (Colombo Stock Exchange) Trading Configuration
+
+cse_fees:
+  # Tiered fee structure based on transaction value
+  tier_1:
+    max_value: 100000000  # Rs. 100Mn
+    broker_commission: 0.00640  # 0.640%
+    cse_fee: 0.00084  # 0.084%
+    cds_fee: 0.00024  # 0.024%
+    sec_fee: 0.00072  # 0.072%
+    stl_tax: 0.003  # 0.3% - Share Transaction Levy (on sell only)
+  
+  tier_2:
+    min_value: 100000000  # Over Rs. 100Mn
+    broker_commission: 0.002000  # 0.2000% (minimum brokerage)
+    cse_fee: 0.000525  # 0.0525%
+    cds_fee: 0.000150  # 0.0150%
+    sec_fee: 0.000450  # 0.0450%
+    stl_tax: 0.003  # 0.3% - Share Transaction Levy (on sell only)
+  
+  minimum_commission: 100  # Minimum commission in LKR
+
+taxes:
+  capital_gains_tax: 0.30  # 30% on realized capital gains
+  dividend_withholding: 0.14  # 14% on dividend income
+
+# Valuation thresholds for emerging markets (CSE)
+thresholds:
+  # Fundamental Analysis
+  pe_ratio:
+    undervalued: 12
+    fair_value_min: 12
+    fair_value_max: 18
+    overvalued: 25
+  
+  pb_ratio:
+    undervalued: 1.0
+    fair_value: 1.5
+    overvalued: 3.0
+  
+  roe:
+    excellent: 0.20  # 20%+
+    good: 0.15  # 15%+
+    acceptable: 0.10  # 10%+
+    poor: 0.05  # Below 5%
+  
+  debt_to_equity:
+    conservative: 0.5
+    moderate: 1.0
+    aggressive: 1.5
+    risky: 2.0
+  
+  current_ratio:
+    strong: 2.0
+    adequate: 1.5
+    concerning: 1.0
+  
+  earnings_growth:
+    excellent: 0.20  # 20%+
+    good: 0.10  # 10%+
+    moderate: 0.05  # 5%+
+  
+  # Technical Analysis
+  rsi:
+    oversold: 30
+    neutral_low: 40
+    neutral_high: 60
+    overbought: 70
+  
+  # Scoring weights (must sum to 1.0)
+  weights:
+    fundamental: 0.60  # 60% weight
+    technical: 0.30  # 30% weight
+    risk: 0.10  # 10% weight
