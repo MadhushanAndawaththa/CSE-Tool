@@ -10,115 +10,99 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QDoubleValidator
 
+import pyqtgraph as pg
+
 from src.calculations.technical import TechnicalAnalyzer
-from gui.styles import INFO_CARD_SUCCESS, INFO_CARD_WARNING, INFO_CARD_DANGER, TEXT_SECONDARY
+from gui.styles import INFO_CARD_SUCCESS, INFO_CARD_WARNING, INFO_CARD_DANGER, TEXT_SECONDARY, TEXT_SECONDARY_DARK
 
 
 class TechnicalTab(QWidget):
     """Technical analysis tab."""
-    
+
     def __init__(self):
         super().__init__()
         self.analyzer = TechnicalAnalyzer()
+        self.is_dark = False
         self.init_ui()
-        
+
     def init_ui(self):
-        """Initialize the user interface."""
         main_layout = QVBoxLayout()
-        main_layout.setSpacing(20)
-        main_layout.setContentsMargins(20, 20, 20, 20)
-        
-        # Header
+        main_layout.setSpacing(10)
+        main_layout.setContentsMargins(14, 14, 14, 14)
+
         header = QLabel("Technical Analysis")
         header.setProperty("heading", True)
         main_layout.addWidget(header)
-        
-        # Instructions
-        instructions = QLabel(
-            "Enter historical price data (one price per line, most recent last). "
-            "Minimum 14 prices for RSI, 26 for MACD, 50 for moving averages."
+
+        self.instructions_label = QLabel(
+            "Enter historical prices (one per line, most recent last). "
+            "Min 14 for RSI, 26 for MACD, 50 for moving averages."
         )
-        instructions.setWordWrap(True)
-        instructions.setStyleSheet(f"color: {TEXT_SECONDARY}; font-size: 13px; padding: 10px; background-color: #f3f4f6; border-radius: 6px;")
-        main_layout.addWidget(instructions)
-        
-        # Content layout
-        content_layout = QHBoxLayout()
-        
-        # Left side - Input panel
-        input_panel = self.create_input_panel()
-        content_layout.addWidget(input_panel, 1)
-        
-        # Right side - Results panel
-        self.results_panel = self.create_results_panel()
-        content_layout.addWidget(self.results_panel, 1)
-        
-        main_layout.addLayout(content_layout)
-        
+        self.instructions_label.setWordWrap(True)
+        self.instructions_label.setStyleSheet(
+            f"color: {TEXT_SECONDARY}; font-size: 11px; padding: 6px 8px; "
+            "background-color: #f3f4f6; border-radius: 4px;"
+        )
+        main_layout.addWidget(self.instructions_label)
+
+        content = QHBoxLayout()
+        content.setSpacing(12)
+        content.addWidget(self._build_input_panel(), 1)
+        self.results_panel = self._build_results_panel()
+        content.addWidget(self.results_panel, 1)
+        main_layout.addLayout(content, 1)
         self.setLayout(main_layout)
-        
-    def create_input_panel(self):
-        """Create the input panel."""
+
+    # ── panels ────────────────────────────────────────────────────────
+
+    def _build_input_panel(self):
         group = QGroupBox("Price Data Input")
         layout = QVBoxLayout()
-        layout.setSpacing(12)
-        layout.setContentsMargins(12, 20, 12, 12)
-        
-        # Stock symbol
-        symbol_layout = QHBoxLayout()
-        symbol_layout.addWidget(QLabel("Stock Symbol:"))
+        layout.setSpacing(8)
+        layout.setContentsMargins(10, 14, 10, 10)
+
+        sym_row = QHBoxLayout()
+        sym_row.addWidget(QLabel("Symbol:"))
         self.symbol_input = QLineEdit()
         self.symbol_input.setPlaceholderText("e.g., JKH.N0000")
-        self.symbol_input.setToolTip("Enter the stock symbol for reference")
-        symbol_layout.addWidget(self.symbol_input)
-        layout.addLayout(symbol_layout)
-        
-        # Price data text area
+        sym_row.addWidget(self.symbol_input)
+        layout.addLayout(sym_row)
+
         layout.addWidget(QLabel("Historical Prices (one per line):"))
         self.price_data_input = QTextEdit()
-        self.price_data_input.setPlaceholderText(
-            "Example:\n150.00\n152.50\n151.75\n155.00\n157.25\n..."
-        )
-        self.price_data_input.setMinimumHeight(300)
-        layout.addWidget(self.price_data_input)
-        
-        # Sample data button
+        self.price_data_input.setPlaceholderText("150.00\n152.50\n151.75\n...")
+        self.price_data_input.setMinimumHeight(180)
+        layout.addWidget(self.price_data_input, 1)
+
         sample_btn = QPushButton("Load Sample Data")
         sample_btn.setProperty("buttonStyle", "secondary")
-        sample_btn.setToolTip("Load example price data for testing")
         sample_btn.clicked.connect(self.load_sample_data)
         layout.addWidget(sample_btn)
-        
-        # Analyze button
+
         self.analyze_btn = QPushButton("Analyze")
-        self.analyze_btn.setToolTip("Calculate technical indicators (RSI, MACD, Moving Averages)")
         self.analyze_btn.clicked.connect(self.analyze)
         layout.addWidget(self.analyze_btn)
-        
-        # Clear button
+
         clear_btn = QPushButton("Clear")
         clear_btn.setProperty("buttonStyle", "secondary")
-        clear_btn.setToolTip("Clear all inputs and results")
         clear_btn.clicked.connect(self.clear_inputs)
         layout.addWidget(clear_btn)
-        
+
         group.setLayout(layout)
         return group
-        
-    def create_results_panel(self):
-        """Create the results display panel."""
+
+    def _build_results_panel(self):
         group = QGroupBox("Technical Indicators")
         layout = QVBoxLayout()
-        
-        # Results label
+        layout.setSpacing(8)
+        layout.setContentsMargins(10, 14, 10, 10)
+
         self.results_label = QLabel("Enter price data and click Analyze to see technical indicators")
         self.results_label.setWordWrap(True)
         self.results_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.results_label.setMinimumHeight(100)
-        self.results_label.setStyleSheet(f"color: {TEXT_SECONDARY}; font-size: 14px; padding: 20px;")
+        self.results_label.setStyleSheet(f"color: {TEXT_SECONDARY}; font-size: 12px; padding: 12px;")
         layout.addWidget(self.results_label)
-        
-        # Results table
+
         self.results_table = QTableWidget()
         self.results_table.setColumnCount(3)
         self.results_table.setHorizontalHeaderLabels(["Indicator", "Value", "Signal"])
@@ -126,191 +110,201 @@ class TechnicalTab(QWidget):
         self.results_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.results_table.setAlternatingRowColors(True)
         self.results_table.verticalHeader().setVisible(False)
-        self.results_table.verticalHeader().setDefaultSectionSize(36)
+        self.results_table.verticalHeader().setDefaultSectionSize(28)
         self.results_table.setShowGrid(False)
-        self.results_table.setAccessibleName("Technical analysis results table")
-        self.results_table.setAccessibleDescription("Displays technical indicators like RSI, MACD with buy/sell signals")
         self.results_table.hide()
         layout.addWidget(self.results_table)
-        
+
+        self.price_plot = pg.PlotWidget()
+        self.price_plot.setMinimumHeight(200)
+        self.price_plot.showGrid(x=True, y=True, alpha=0.2)
+        self.price_plot.addLegend(offset=(10, 10))
+        self.price_plot.setBackground(None)
+        layout.addWidget(self.price_plot)
+
         group.setLayout(layout)
         return group
-        
+
+    # ── sample data ───────────────────────────────────────────────────
+
     def load_sample_data(self):
-        """Load sample price data."""
-        sample_data = """150.00
-152.50
-151.75
-155.00
-157.25
-156.50
-158.75
-160.00
-159.25
-161.50
-163.00
-162.25
-165.00
-167.50
-166.75
-169.00
-171.25
-170.50
-172.75
-175.00
-174.25
-176.50
-178.75
-177.50
-180.00
-182.25
-181.50
-183.75
-186.00
-185.25
-187.50
-190.00
-189.25
-191.50
-193.75
-192.50
-195.00
-197.25
-196.50
-199.00
-201.25
-200.50
-202.75
-205.00
-204.25
-206.50
-208.75
-207.50
-210.00
-212.25"""
-        self.price_data_input.setPlainText(sample_data)
-        
+        self.price_data_input.setPlainText(
+            "150.00\n152.50\n151.75\n155.00\n157.25\n156.50\n158.75\n160.00\n"
+            "159.25\n161.50\n163.00\n162.25\n165.00\n167.50\n166.75\n169.00\n"
+            "171.25\n170.50\n172.75\n175.00\n174.25\n176.50\n178.75\n177.50\n"
+            "180.00\n182.25\n181.50\n183.75\n186.00\n185.25\n187.50\n190.00\n"
+            "189.25\n191.50\n193.75\n192.50\n195.00\n197.25\n196.50\n199.00\n"
+            "201.25\n200.50\n202.75\n205.00\n204.25\n206.50\n208.75\n207.50\n"
+            "210.00\n212.25"
+        )
+
+    # ── analysis ──────────────────────────────────────────────────────
+
     def analyze(self):
-        """Perform technical analysis."""
         try:
-            # Parse price data
             price_text = self.price_data_input.toPlainText().strip()
             if not price_text:
                 QMessageBox.warning(self, "Input Error", "Please enter price data.")
                 return
-                
+
             prices = []
-            for line in price_text.split('\n'):
+            for line in price_text.split("\n"):
                 line = line.strip()
                 if line:
                     try:
                         prices.append(float(line))
                     except ValueError:
-                        QMessageBox.warning(self, "Input Error", f"Invalid price value: {line}")
+                        QMessageBox.warning(self, "Input Error", f"Invalid price: {line}")
                         return
-            
+
             if len(prices) < 14:
-                QMessageBox.warning(
-                    self, "Insufficient Data", 
-                    "Please provide at least 14 price values for technical analysis."
-                )
+                QMessageBox.warning(self, "Insufficient Data",
+                    "Need at least 14 prices for technical analysis.")
                 return
-            
+
             results = []
-            
-            # RSI
+            plot_data = {"prices": prices}
+
             if len(prices) >= 14:
-                rsi_result = self.analyzer.calculate_rsi(prices, period=14)
-                if rsi_result['rsi'] is not None:
-                    results.append(("RSI (14)", f"{rsi_result['rsi']:.2f}", rsi_result['signal']))
-            
-            # MACD
+                rsi = self.analyzer.calculate_rsi(prices, period=14)
+                if rsi["rsi"] is not None:
+                    results.append(("RSI (14)", f"{rsi['rsi']:.2f}", rsi["signal"]))
+
             if len(prices) >= 26:
-                macd_result = self.analyzer.calculate_macd(prices)
-                if macd_result['macd'] is not None:
-                    results.append(("MACD", f"{macd_result['macd']:.2f}", macd_result['signal']))
-                    if macd_result['signal_line'] is not None:
-                        results.append(("MACD Signal", f"{macd_result['signal_line']:.2f}", ""))
-            
-            # Moving Averages
+                macd = self.analyzer.calculate_macd(prices)
+                if macd["macd"] is not None:
+                    results.append(("MACD", f"{macd['macd']:.2f}", macd["signal"]))
+                    if macd["signal_line"] is not None:
+                        results.append(("MACD Signal", f"{macd['signal_line']:.2f}", ""))
+
             if len(prices) >= 50:
-                ma_result = self.analyzer.calculate_moving_averages(prices, short_period=20, long_period=50)
-                current_price = prices[-1]
-                results.append(("Current Price", f"{current_price:.2f}", ""))
-                results.append(("MA 20", f"{ma_result['short_ma']:.2f}", ""))
-                results.append(("MA 50", f"{ma_result['long_ma']:.2f}", ma_result['signal']))
-            
+                ma = self.analyzer.calculate_moving_averages(prices, short_period=20, long_period=50)
+                results.append(("Current Price", f"{prices[-1]:.2f}", ""))
+                results.append(("MA 20", f"{ma['short_ma']:.2f}", ""))
+                results.append(("MA 50", f"{ma['long_ma']:.2f}", ma["signal"]))
+                plot_data["ma20"] = self.calculate_sma(prices, 20)
+                plot_data["ma50"] = self.calculate_sma(prices, 50)
+
             if not results:
-                QMessageBox.warning(
-                    self, "Analysis Error", 
-                    "Could not calculate indicators. Please check your data."
-                )
+                QMessageBox.warning(self, "Analysis Error", "Could not calculate indicators.")
                 return
-            
-            self.display_results(results, prices)
-            
+
+            self._show_results(results, prices, plot_data)
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
-            
-    def display_results(self, results, prices):
-        """Display analysis results."""
+            QMessageBox.critical(self, "Error", str(e))
+
+    def _show_results(self, results, prices, plot_data):
         self.results_table.setRowCount(0)
         self.results_table.show()
-        
-        # Count signals - match actual technical analyzer output
-        buy_signals = sum(1 for _, _, signal in results if signal in ['BUY', 'STRONG BUY'])
-        sell_signals = sum(1 for _, _, signal in results if signal in ['SELL', 'STRONG SELL'])
-        neutral_signals = sum(1 for _, _, signal in results if signal == 'NEUTRAL')
-        
-        # Populate table
-        for indicator, value, signal in results:
+
+        buy = sum(1 for _, _, s in results if s in ("BUY", "STRONG BUY"))
+        sell = sum(1 for _, _, s in results if s in ("SELL", "STRONG SELL"))
+
+        for ind, val, sig in results:
             row = self.results_table.rowCount()
             self.results_table.insertRow(row)
-            
-            item1 = QTableWidgetItem(indicator)
-            item2 = QTableWidgetItem(value)
-            item3 = QTableWidgetItem(signal)
-            
-            # Bold current price
-            if indicator == "Current Price":
-                font = item1.font()
-                font.setBold(True)
-                item1.setFont(font)
-                item2.setFont(font)
-            
-            self.results_table.setItem(row, 0, item1)
-            self.results_table.setItem(row, 1, item2)
-            self.results_table.setItem(row, 2, item3)
-        
+            i1, i2, i3 = QTableWidgetItem(ind), QTableWidgetItem(val), QTableWidgetItem(sig)
+            if ind == "Current Price":
+                f = i1.font(); f.setBold(True); i1.setFont(f); i2.setFont(f)
+            self.results_table.setItem(row, 0, i1)
+            self.results_table.setItem(row, 1, i2)
+            self.results_table.setItem(row, 2, i3)
         self.results_table.resizeColumnsToContents()
-        
-        # Overall summary
-        if buy_signals > sell_signals:
-            style = INFO_CARD_SUCCESS
-            summary = "Bullish Technical Signals"
-            message = f"Buy signals: {buy_signals}, Sell signals: {sell_signals}"
-        elif sell_signals > buy_signals:
-            style = INFO_CARD_DANGER
-            summary = "Bearish Technical Signals"
-            message = f"Sell signals: {sell_signals}, Buy signals: {buy_signals}"
+
+        if buy > sell:
+            style, summary, msg = INFO_CARD_SUCCESS, "Bullish Signals", f"Buy: {buy}, Sell: {sell}"
+        elif sell > buy:
+            style, summary, msg = INFO_CARD_DANGER, "Bearish Signals", f"Sell: {sell}, Buy: {buy}"
         else:
-            style = INFO_CARD_WARNING
-            summary = "Neutral Technical Signals"
-            message = f"Mixed signals detected"
-        
-        summary_html = f"""
-        <div style='{style}'>
-            <h3 style='margin-top:0; color: inherit;'>{summary}</h3>
-            <p style='color: inherit;'><b>{message}</b></p>
-            <p style='color: inherit;'>Analyzed {len(prices)} price points</p>
-        </div>
-        """
-        self.results_label.setText(summary_html)
-        
+            style, summary, msg = INFO_CARD_WARNING, "Neutral Signals", "Mixed signals"
+
+        self.results_label.setText(
+            f"<div style='{style}'><b>{summary}</b><br>"
+            f"{msg} &mdash; {len(prices)} data points</div>"
+        )
+        self.update_plot(plot_data)
+
+    # ── clear ─────────────────────────────────────────────────────────
+
     def clear_inputs(self):
-        """Clear all input fields and results."""
         self.symbol_input.clear()
         self.price_data_input.clear()
         self.results_table.hide()
         self.results_label.setText("Enter price data and click Analyze to see technical indicators")
-        self.results_label.setStyleSheet(f"color: {TEXT_SECONDARY}; font-size: 14px; padding: 20px;")
+        self._update_results_label_style()
+        self.price_plot.clear()
+
+    # ── theme ─────────────────────────────────────────────────────────
+
+    def _update_results_label_style(self):
+        c = TEXT_SECONDARY_DARK if self.is_dark else TEXT_SECONDARY
+        self.results_label.setStyleSheet(f"color: {c}; font-size: 12px; padding: 12px;")
+
+    def _update_instructions_style(self):
+        c = TEXT_SECONDARY_DARK if self.is_dark else TEXT_SECONDARY
+        bg = "#1f2937" if self.is_dark else "#f3f4f6"
+        self.instructions_label.setStyleSheet(
+            f"color: {c}; font-size: 11px; padding: 6px 8px; background-color: {bg}; border-radius: 4px;"
+        )
+
+    def apply_theme(self, dark_mode: bool):
+        self.is_dark = dark_mode
+        self._update_results_label_style()
+        self._update_instructions_style()
+        self._update_plot_theme()
+
+    def _update_plot_theme(self):
+        ac = "#cbd5e1" if self.is_dark else "#475569"
+        gc = "#334155" if self.is_dark else "#e2e8f0"
+        for axis in ("left", "bottom"):
+            ax = self.price_plot.getAxis(axis)
+            ax.setPen(pg.mkPen(ac))
+            ax.setTextPen(pg.mkPen(ac))
+        self.price_plot.getPlotItem().getViewBox().setBackgroundColor(
+            "#0b1220" if self.is_dark else "#ffffff"
+        )
+        self.price_plot.getPlotItem().setMenuEnabled(False)
+        self.price_plot.showGrid(x=True, y=True, alpha=0.25)
+        self.price_plot.getPlotItem().getViewBox().setBorder(pg.mkPen(gc))
+
+    # ── chart ─────────────────────────────────────────────────────────
+
+    def update_plot(self, plot_data):
+        self.price_plot.clear()
+        prices = plot_data.get("prices", [])
+        if not prices:
+            return
+        x = list(range(1, len(prices) + 1))
+        pc = "#60a5fa" if self.is_dark else "#2563eb"
+        mc = "#22c55e" if self.is_dark else "#16a34a"
+        fc = "#f59e0b" if self.is_dark else "#d97706"
+        self.price_plot.plot(x, prices, pen=pg.mkPen(pc, width=2), name="Price")
+        for series_key, color, label in [("ma20", mc, "MA 20"), ("ma50", fc, "MA 50")]:
+            series = plot_data.get(series_key)
+            if series:
+                xs, ys = self._series_points(series)
+                if xs:
+                    self.price_plot.plot(xs, ys, pen=pg.mkPen(color, width=2), name=label)
+        self.price_plot.setLabel("bottom", "Data Points")
+        self.price_plot.setLabel("left", "Price (LKR)")
+
+    @staticmethod
+    def calculate_sma(prices, period):
+        if len(prices) < period:
+            return None
+        sma = []
+        for i in range(len(prices)):
+            if i < period - 1:
+                sma.append(None)
+            else:
+                sma.append(sum(prices[i - period + 1: i + 1]) / period)
+        return sma
+
+    @staticmethod
+    def _series_points(series):
+        xs, ys = [], []
+        for i, v in enumerate(series):
+            if v is not None:
+                xs.append(i + 1)
+                ys.append(v)
+        return xs, ys

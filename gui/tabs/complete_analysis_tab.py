@@ -3,111 +3,101 @@ Complete Analysis tab for CSE Stock Analyzer GUI.
 """
 
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QMessageBox
+    QWidget, QVBoxLayout, QLabel, QPushButton, QMessageBox
 )
 from PyQt6.QtCore import Qt
 
-from gui.styles import INFO_CARD_WARNING, TEXT_SECONDARY
+from gui.styles import INFO_CARD_WARNING, TEXT_SECONDARY, TEXT_SECONDARY_DARK
 
 
 class CompleteAnalysisTab(QWidget):
-    """Complete stock analysis tab with recommendations."""
-    
+    """Complete stock analysis tab - coming soon placeholder."""
+
     def __init__(self):
         super().__init__()
+        self.is_dark = False
         self.init_ui()
-        
+
     def init_ui(self):
-        """Initialize the user interface."""
         main_layout = QVBoxLayout()
-        main_layout.setSpacing(20)
-        main_layout.setContentsMargins(20, 20, 20, 20)
-        
-        # Header
+        main_layout.setSpacing(10)
+        main_layout.setContentsMargins(14, 14, 14, 14)
+
         header = QLabel("Complete Stock Analysis")
         header.setProperty("heading", True)
         main_layout.addWidget(header)
-        
-        # Coming soon message
-        message_container = QWidget()
-        message_layout = QVBoxLayout()
-        message_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        
-        icon_label = QLabel("🎯")
-        icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        icon_label.setStyleSheet("font-size: 72px;")
-        message_layout.addWidget(icon_label)
-        
-        title_label = QLabel("Complete Analysis with Recommendations")
-        title_label.setProperty("heading", True)
-        title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        message_layout.addWidget(title_label)
-        
-        desc_label = QLabel(
-            "This feature combines fundamental and technical analysis to provide "
+
+        # centered coming-soon card
+        center = QVBoxLayout()
+        center.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        center.setSpacing(12)
+
+        self.title_label = QLabel("Complete Analysis with Recommendations")
+        self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.title_label.setStyleSheet("font-size: 15px; font-weight: 600; color: #1e293b;")
+        center.addWidget(self.title_label)
+
+        self.desc_label = QLabel(
+            "Combines fundamental and technical analysis to provide "
             "comprehensive buy/sell recommendations with risk scoring."
         )
-        desc_label.setWordWrap(True)
-        desc_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        desc_label.setStyleSheet(f"color: {TEXT_SECONDARY}; font-size: 14px; padding: 20px; max-width: 600px;")
-        message_layout.addWidget(desc_label)
-        
-        # Features list
-        features_html = """
-        <div style='background-color: #f9fafb; border: 2px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 20px;'>
-            <h3 style='color: #111827; margin-top: 0;'>Planned Features:</h3>
-            <ul style='color: #4b5563; font-size: 14px; line-height: 1.8;'>
-                <li><b>Combined Analysis:</b> Merge fundamental and technical indicators</li>
-                <li><b>Risk Assessment:</b> Calculate risk scores based on volatility and fundamentals</li>
-                <li><b>Recommendation Engine:</b> Strong Buy, Buy, Hold, Sell, Strong Sell</li>
-                <li><b>Target Prices:</b> Calculate optimal entry and exit points</li>
-                <li><b>Confidence Levels:</b> High, Medium, Low confidence ratings</li>
-                <li><b>PDF Reports:</b> Export comprehensive analysis reports</li>
-            </ul>
-        </div>
-        """
-        features_label = QLabel(features_html)
-        features_label.setWordWrap(True)
-        message_layout.addWidget(features_label)
-        
-        # Workaround info
-        workaround_html = f"""
-        <div style='{INFO_CARD_WARNING}'>
-            <h3 style='margin-top:0; color: inherit;'>⚡ Current Workaround</h3>
-            <p style='color: inherit;'>Use the <b>Fundamental Analysis</b> and <b>Technical Analysis</b> tabs separately, 
-            then combine the insights manually. The Break-Even Calculator helps determine optimal sell prices.</p>
-        </div>
-        """
-        workaround_label = QLabel(workaround_html)
-        workaround_label.setWordWrap(True)
-        message_layout.addWidget(workaround_label)
-        
-        # Action button
-        action_btn = QPushButton("Use CLI Version for Complete Analysis")
-        action_btn.clicked.connect(self.show_cli_instructions)
-        action_btn.setMaximumWidth(400)
-        message_layout.addWidget(action_btn, alignment=Qt.AlignmentFlag.AlignCenter)
-        
-        message_layout.addStretch()
-        message_container.setLayout(message_layout)
-        main_layout.addWidget(message_container)
-        
-        self.setLayout(main_layout)
-        
-    def show_cli_instructions(self):
-        """Show instructions for using CLI version."""
-        QMessageBox.information(
-            self,
-            "CLI Complete Analysis",
-            """<h3>Using the Command Line Interface</h3>
-            <p>The CLI version has full complete analysis functionality:</p>
-            <ol>
-                <li>Open a terminal in the CSE directory</li>
-                <li>Run: <code>python main.py</code></li>
-                <li>Select option 3: "Complete Stock Analysis (with Recommendations)"</li>
-                <li>Enter all required data (fundamental + technical)</li>
-                <li>Get comprehensive buy/sell recommendations with scoring</li>
-            </ol>
-            <p><b>Note:</b> The GUI version of this feature is under development.</p>
-            """
+        self.desc_label.setWordWrap(True)
+        self.desc_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.desc_label.setStyleSheet(f"color: {TEXT_SECONDARY}; font-size: 12px; padding: 4px 40px;")
+        center.addWidget(self.desc_label)
+
+        features = QLabel(
+            "<div style='padding:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px;'>"
+            "<b>Planned Features</b><br><br>"
+            "• Combined fundamental + technical indicators<br>"
+            "• Risk assessment &amp; confidence levels<br>"
+            "• Strong Buy / Buy / Hold / Sell recommendations<br>"
+            "• Target entry &amp; exit prices<br>"
+            "• PDF report export"
+            "</div>"
         )
+        features.setWordWrap(True)
+        features.setMaximumWidth(460)
+        features.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        center.addWidget(features, 0, Qt.AlignmentFlag.AlignCenter)
+
+        hint = QLabel(
+            f"<div style='{INFO_CARD_WARNING}'>"
+            "Use the <b>Fundamental</b> and <b>Technical</b> tabs separately for now, "
+            "or run the CLI for a combined analysis.</div>"
+        )
+        hint.setWordWrap(True)
+        hint.setMaximumWidth(460)
+        center.addWidget(hint, 0, Qt.AlignmentFlag.AlignCenter)
+
+        cli_btn = QPushButton("CLI Instructions")
+        cli_btn.setProperty("buttonStyle", "secondary")
+        cli_btn.setMaximumWidth(200)
+        cli_btn.clicked.connect(self.show_cli_instructions)
+        center.addWidget(cli_btn, 0, Qt.AlignmentFlag.AlignCenter)
+
+        main_layout.addLayout(center, 1)
+        self.setLayout(main_layout)
+
+    def apply_theme(self, dark_mode: bool):
+        self.is_dark = dark_mode
+        c = TEXT_SECONDARY_DARK if dark_mode else TEXT_SECONDARY
+        tc = "#e2e4e7" if dark_mode else "#1e293b"
+        self.desc_label.setStyleSheet(f"color: {c}; font-size: 12px; padding: 4px 40px;")
+        self.title_label.setStyleSheet(f"font-size: 15px; font-weight: 600; color: {tc};")
+
+    def show_cli_instructions(self):
+        msg = QMessageBox(self)
+        msg.setWindowTitle("CLI Complete Analysis")
+        msg.setTextFormat(Qt.TextFormat.RichText)
+        tc = "#e2e4e7" if self.is_dark else "#1e293b"
+        msg.setText(
+            f"<h3 style='color:{tc}'>Using the CLI</h3>"
+            f"<ol style='color:{tc}'><li>Open a terminal in the CSE directory</li>"
+            f"<li>Run: <code>python main.py</code></li>"
+            f"<li>Select option 3: Complete Stock Analysis</li></ol>"
+            f"<p style='color:{tc}'>The CLI version provides full combined analysis.</p>"
+        )
+        if self.is_dark:
+            msg.setStyleSheet("QLabel { color: #e2e4e7; } QMessageBox { background: #1e293b; }")
+        msg.exec()
