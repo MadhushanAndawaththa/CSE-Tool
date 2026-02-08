@@ -681,3 +681,44 @@ INFO_CARD_WARNING = f"""
     padding: 12px 14px;
     color: #92400e;
 """
+
+# Dark-mode variants for info cards
+INFO_CARD_SUCCESS_DARK = f"""
+    background-color: #064e3b;
+    border-left: 4px solid {SUCCESS};
+    border-radius: 6px;
+    padding: 12px 14px;
+    color: #a7f3d0;
+"""
+
+INFO_CARD_DANGER_DARK = f"""
+    background-color: #7f1d1d;
+    border-left: 4px solid {DANGER};
+    border-radius: 6px;
+    padding: 12px 14px;
+    color: #fecaca;
+"""
+
+INFO_CARD_WARNING_DARK = f"""
+    background-color: #78350f;
+    border-left: 4px solid {WARNING};
+    border-radius: 6px;
+    padding: 12px 14px;
+    color: #fde68a;
+"""
+
+
+def get_info_card_style(variant: str, dark: bool) -> str:
+    """Return the appropriate info card style based on variant and theme.
+    
+    Args:
+        variant: 'success', 'danger', or 'warning'
+        dark: True for dark mode
+    """
+    styles = {
+        'success': (INFO_CARD_SUCCESS, INFO_CARD_SUCCESS_DARK),
+        'danger': (INFO_CARD_DANGER, INFO_CARD_DANGER_DARK),
+        'warning': (INFO_CARD_WARNING, INFO_CARD_WARNING_DARK),
+    }
+    light, dark_style = styles.get(variant, (INFO_CARD_WARNING, INFO_CARD_WARNING_DARK))
+    return dark_style if dark else light
