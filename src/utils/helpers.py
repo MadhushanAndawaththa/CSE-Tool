@@ -3,7 +3,6 @@ Utility functions and configuration loader for CSE Stock Analyzer.
 """
 
 import yaml
-import os
 from pathlib import Path
 
 

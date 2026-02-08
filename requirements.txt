@@ -1,15 +1,16 @@
+# Core Dependencies
 pandas>=2.0.0
 numpy>=1.24.0
 pandas-ta>=0.4.0
+pyyaml>=6.0
+
+# CLI Dependencies
 tabulate>=0.9.0
 colorama>=0.4.6
-pyyaml>=6.0
 click>=8.1.0
 
 # PyQt6 GUI Dependencies
 PyQt6>=6.6.0
-matplotlib>=3.8.0
-reportlab>=4.0.0
 pyqtgraph>=0.13.3
 qtawesome>=1.3.0
-pyqtdarktheme>=2.1.0
+# pyqtdarktheme>=2.1.0  # Optional: may fail on Python 3.12+, app works without it
