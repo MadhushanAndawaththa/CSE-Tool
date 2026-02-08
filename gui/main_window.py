@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (
     QToolBar, QStatusBar, QMessageBox, QLabel, QApplication
 )
 from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QAction
+from PyQt6.QtGui import QAction, QColor, QPalette
 
 import qtawesome as qta
 
@@ -39,9 +39,7 @@ class MainWindow(QMainWindow):
         self.create_status_bar()
         self.apply_theme(False)
 
-        if qdarktheme is None:
-            self.dark_mode_action.setEnabled(False)
-            self.theme_toolbar_action.setEnabled(False)
+        # Dark mode works with or without qdarktheme
 
     # ── UI setup ──────────────────────────────────────────────────────
 
@@ -239,8 +237,31 @@ class MainWindow(QMainWindow):
             if qdarktheme is not None:
                 app.setStyleSheet(qdarktheme.load_stylesheet() + GLOBAL_STYLESHEET_DARK)  # type: ignore
             else:
+                # Build a dark palette so Fusion renders dark base colors
+                palette = QPalette()
+                palette.setColor(QPalette.ColorRole.Window, QColor("#0f172a"))
+                palette.setColor(QPalette.ColorRole.WindowText, QColor("#e2e4e7"))
+                palette.setColor(QPalette.ColorRole.Base, QColor("#1e293b"))
+                palette.setColor(QPalette.ColorRole.AlternateBase, QColor("#0f172a"))
+                palette.setColor(QPalette.ColorRole.ToolTipBase, QColor("#1e293b"))
+                palette.setColor(QPalette.ColorRole.ToolTipText, QColor("#e2e4e7"))
+                palette.setColor(QPalette.ColorRole.Text, QColor("#e2e4e7"))
+                palette.setColor(QPalette.ColorRole.Button, QColor("#1e293b"))
+                palette.setColor(QPalette.ColorRole.ButtonText, QColor("#e2e4e7"))
+                palette.setColor(QPalette.ColorRole.BrightText, QColor("#ffffff"))
+                palette.setColor(QPalette.ColorRole.Link, QColor("#93c5fd"))
+                palette.setColor(QPalette.ColorRole.Highlight, QColor("#2563eb"))
+                palette.setColor(QPalette.ColorRole.HighlightedText, QColor("#ffffff"))
+                palette.setColor(QPalette.ColorRole.PlaceholderText, QColor("#64748b"))
+                palette.setColor(QPalette.ColorRole.Light, QColor("#334155"))
+                palette.setColor(QPalette.ColorRole.Midlight, QColor("#1e293b"))
+                palette.setColor(QPalette.ColorRole.Dark, QColor("#0f172a"))
+                palette.setColor(QPalette.ColorRole.Mid, QColor("#334155"))
+                palette.setColor(QPalette.ColorRole.Shadow, QColor("#000000"))
+                app.setPalette(palette)  # type: ignore
                 app.setStyleSheet(GLOBAL_STYLESHEET_DARK)  # type: ignore
         else:
+            app.setPalette(self.style().standardPalette())  # type: ignore
             app.setStyleSheet(GLOBAL_STYLESHEET)  # type: ignore
         self.dark_mode = dark_mode
         for tab in [self.breakeven_tab, self.fees_tab, self.fundamental_tab,
