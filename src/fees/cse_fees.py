@@ -76,10 +76,15 @@ class CSEFeeCalculator:
         return {
             'transaction_value': transaction_value,
             'broker_commission': broker_commission,
+            'broker_commission_rate': rates['broker_commission'],
             'sec_fee': sec_fee,
+            'sec_fee_rate': rates['sec_fee'],
             'cse_fee': cse_fee,
+            'cse_fee_rate': rates['cse_fee'],
             'cds_fee': cds_fee,
+            'cds_fee_rate': rates['cds_fee'],
             'total_fees': total_fees,
+            'total_fee_percentage': total_fees / transaction_value if transaction_value > 0 else 0,
             'total_cost': total_cost,
             'effective_rate': total_fees / transaction_value if transaction_value > 0 else 0,
             'tier': 'Tier 1 (≤ Rs. 100Mn)' if transaction_value <= self.config['cse_fees']['tier_1']['max_value'] else 'Tier 2 (> Rs. 100Mn)'
@@ -116,11 +121,17 @@ class CSEFeeCalculator:
         return {
             'transaction_value': transaction_value,
             'broker_commission': broker_commission,
+            'broker_commission_rate': rates['broker_commission'],
             'sec_fee': sec_fee,
+            'sec_fee_rate': rates['sec_fee'],
             'cse_fee': cse_fee,
+            'cse_fee_rate': rates['cse_fee'],
             'cds_fee': cds_fee,
+            'cds_fee_rate': rates['cds_fee'],
             'stl_tax': stl_tax,
+            'stl_tax_rate': rates['stl_tax'],
             'total_fees': total_fees,
+            'total_fee_percentage': total_fees / transaction_value if transaction_value > 0 else 0,
             'net_proceeds': net_proceeds,
             'effective_rate': total_fees / transaction_value if transaction_value > 0 else 0,
             'tier': 'Tier 1 (≤ Rs. 100Mn)' if transaction_value <= self.config['cse_fees']['tier_1']['max_value'] else 'Tier 2 (> Rs. 100Mn)'
