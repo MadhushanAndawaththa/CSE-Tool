@@ -11,7 +11,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QDoubleValidator, QIntValidator
 
 from src.fees.cse_fees import CSEFeeCalculator
-from gui.styles import CARD_STYLE
+from gui.styles import TEXT_SECONDARY, TEXT_SECONDARY_DARK
 
 
 class FeesTab(QWidget):
@@ -20,6 +20,7 @@ class FeesTab(QWidget):
     def __init__(self):
         super().__init__()
         self.fee_calculator = CSEFeeCalculator()
+        self.is_dark = False
         self.init_ui()
 
     def init_ui(self):
@@ -99,45 +100,50 @@ class FeesTab(QWidget):
         layout.setSpacing(8)
         layout.setContentsMargins(10, 14, 10, 10)
 
-        tier_info = QLabel(
-            "<b>Tier 1:</b> Transactions <= Rs. 100,000,000  &nbsp;|&nbsp;  "
+        self.tier_info_label = QLabel(
+            "<b>Tier 1:</b> Transactions \u2264 Rs. 100,000,000  &nbsp;|&nbsp;  "
             "<b>Tier 2:</b> Transactions > Rs. 100,000,000"
         )
-        tier_info.setWordWrap(True)
-        layout.addWidget(tier_info)
+        self.tier_info_label.setWordWrap(True)
+        layout.addWidget(self.tier_info_label)
 
-        # Tier 1
+        # Tier 1 \u2014 rates match config.yaml
         layout.addWidget(QLabel("<b>Tier 1 Fees:</b>"))
         t1 = self._make_tier_table([
-            ("Broker Commission", "0.64%"),
+            ("Broker Commission", "0.640%"),
             ("SEC Fee", "0.072%"),
             ("CSE Fee", "0.084%"),
             ("CDS Fee", "0.024%"),
-            ("STL Tax (Sell only)", "0.30%"),
+            ("STL Tax (Sell only)", "0.300%"),
         ])
         layout.addWidget(t1)
 
-        # Tier 2
+        # Tier 2 \u2014 rates match config.yaml
         layout.addWidget(QLabel("<b>Tier 2 Fees:</b>"))
         t2 = self._make_tier_table([
-            ("Broker Commission", "Min 0.20%"),
-            ("SEC Fee", "0.042%"),
-            ("CSE Fee", "0.054%"),
-            ("CDS Fee", "0.024%"),
-            ("STL Tax (Sell only)", "0.30%"),
+            ("Broker Commission", "Min 0.200%"),
+            ("SEC Fee", "0.045%"),
+            ("CSE Fee", "0.0525%"),
+            ("CDS Fee", "0.015%"),
+            ("STL Tax (Sell only)", "0.300%"),
         ])
         layout.addWidget(t2)
 
-        tax_lbl = QLabel(
-            "<b>Capital Gains Tax:</b> 30% on net profit "
-            "<span style='color:#64748b;'>(Gross Profit - Total Fees)</span>"
-        )
-        tax_lbl.setWordWrap(True)
-        layout.addWidget(tax_lbl)
+        self.tax_label = QLabel()
+        self.tax_label.setWordWrap(True)
+        self._update_tax_label()
+        layout.addWidget(self.tax_label)
 
         layout.addStretch()
         group.setLayout(layout)
         return group
+
+    def _update_tax_label(self):
+        c = TEXT_SECONDARY_DARK if self.is_dark else TEXT_SECONDARY
+        self.tax_label.setText(
+            f"<b>Capital Gains Tax:</b> 30% on net profit "
+            f"<span style='color:{c};'>(Gross Profit - Total Fees)</span>"
+        )
 
     @staticmethod
     def _make_tier_table(rows):
@@ -163,7 +169,8 @@ class FeesTab(QWidget):
     def calculate_fees(self, fee_type):
         try:
             if not self.transaction_value_input.text() or not self.shares_input.text():
-                QMessageBox.warning(self, "Input Error", "Please enter transaction value and number of shares.")
+                self._show_msg(QMessageBox.Icon.Warning, "Input Error",
+                               "Please enter transaction value and number of shares.")
                 return
             tv = float(self.transaction_value_input.text())
             shares = int(float(self.shares_input.text()))
@@ -173,9 +180,10 @@ class FeesTab(QWidget):
                 result = self.fee_calculator.calculate_sell_fees(tv, shares)
             self._show_fee_results(result)
         except ValueError:
-            QMessageBox.critical(self, "Input Error", "Please enter valid numbers.")
+            self._show_msg(QMessageBox.Icon.Critical, "Input Error",
+                           "Please enter valid numbers.")
         except Exception as e:
-            QMessageBox.critical(self, "Calculation Error", str(e))
+            self._show_msg(QMessageBox.Icon.Critical, "Calculation Error", str(e))
 
     def _show_fee_results(self, r):
         self.fee_table.setRowCount(0)
@@ -214,4 +222,14 @@ class FeesTab(QWidget):
         self.fee_table.setRowCount(0)
 
     def apply_theme(self, dark_mode: bool):
-        pass  # handled by global stylesheet
+        self.is_dark = dark_mode
+        self._update_tax_label()
+
+    def _show_msg(self, icon, title, text):
+        msg = QMessageBox(self)
+        msg.setWindowTitle(title)
+        msg.setText(text)
+        msg.setIcon(icon)
+        if self.is_dark:
+            msg.setStyleSheet("QLabel { color: #e2e4e7; } QMessageBox { background: #1e293b; }")
+        msg.exec()

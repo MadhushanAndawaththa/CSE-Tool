@@ -11,7 +11,11 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QDoubleValidator, QIntValidator
 
 from src.calculations.breakeven import BreakEvenCalculator
-from gui.styles import INFO_CARD_SUCCESS, INFO_CARD_DANGER, INFO_CARD_WARNING, TEXT_SECONDARY, TEXT_SECONDARY_DARK
+from gui.styles import (
+    INFO_CARD_SUCCESS, INFO_CARD_DANGER, INFO_CARD_WARNING,
+    TEXT_SECONDARY, TEXT_SECONDARY_DARK,
+    get_info_card_style
+)
 
 
 class BreakEvenTab(QWidget):
@@ -151,7 +155,7 @@ class BreakEvenTab(QWidget):
     def calculate(self):
         try:
             if not self.buy_price_input.text() or not self.quantity_input.text():
-                QMessageBox.warning(self, "Input Required",
+                self._show_msg(QMessageBox.Icon.Warning, "Input Required",
                     "Please enter both purchase price and quantity.")
                 return
             buy_price = float(self.buy_price_input.text())
@@ -160,7 +164,7 @@ class BreakEvenTab(QWidget):
 
             if self.mode_profit.isChecked():
                 if not self.sell_price_input.text():
-                    QMessageBox.warning(self, "Input Required", "Please enter selling price.")
+                    self._show_msg(QMessageBox.Icon.Warning, "Input Required", "Please enter selling price.")
                     return
                 sell_price = float(self.sell_price_input.text())
                 result = self.calculator.calculate_profit_at_price(buy_price, sell_price, quantity, include_tax)
@@ -169,9 +173,9 @@ class BreakEvenTab(QWidget):
                 result = self.calculator.calculate_breakeven_price(buy_price, quantity, include_tax)
                 self._show_breakeven_results(result)
         except ValueError as e:
-            QMessageBox.critical(self, "Calculation Error", f"Invalid input: {e}")
+            self._show_msg(QMessageBox.Icon.Critical, "Calculation Error", f"Invalid input: {e}")
         except Exception as e:
-            QMessageBox.critical(self, "Error", str(e))
+            self._show_msg(QMessageBox.Icon.Critical, "Error", str(e))
 
     # ── display helpers ───────────────────────────────────────────────
 
@@ -207,7 +211,7 @@ class BreakEvenTab(QWidget):
             data.append(("Capital Gains Tax", "Yes (30%)"))
         self._populate_table(data)
         self.results_label.setText(
-            f"<div style='{INFO_CARD_SUCCESS}'>"
+            f"<div style='{get_info_card_style('success', self.is_dark)}'>"
             f"<b>Break-Even: LKR {r['breakeven_price']:.2f}</b><br>"
             f"Price increase: LKR {r['price_increase_required']:.2f} "
             f"({r['price_increase_percentage'] * 100:.2f}%)</div>"
@@ -233,7 +237,7 @@ class BreakEvenTab(QWidget):
             ("Above/Below BE", f"LKR {r['price_vs_breakeven']:.2f}"),
         ]
         self._populate_table(data)
-        style = INFO_CARD_SUCCESS if is_profit else INFO_CARD_DANGER
+        style = get_info_card_style('success', self.is_dark) if is_profit else get_info_card_style('danger', self.is_dark)
         tag = "PROFIT" if is_profit else "LOSS"
         self.results_label.setText(
             f"<div style='{style}'>"
@@ -259,3 +263,12 @@ class BreakEvenTab(QWidget):
     def apply_theme(self, dark_mode: bool):
         self.is_dark = dark_mode
         self._update_results_label_style()
+
+    def _show_msg(self, icon, title, text):
+        msg = QMessageBox(self)
+        msg.setWindowTitle(title)
+        msg.setText(text)
+        msg.setIcon(icon)
+        if self.is_dark:
+            msg.setStyleSheet("QLabel { color: #e2e4e7; } QMessageBox { background: #1e293b; }")
+        msg.exec()

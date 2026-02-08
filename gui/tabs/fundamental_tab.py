@@ -5,13 +5,17 @@ Fundamental Analysis tab for CSE Stock Analyzer GUI.
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QGroupBox,
     QLabel, QLineEdit, QPushButton, QTableWidget, QTableWidgetItem,
-    QMessageBox, QScrollArea
+    QMessageBox
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QDoubleValidator
 
 from src.calculations.fundamental import FundamentalAnalyzer
-from gui.styles import INFO_CARD_SUCCESS, INFO_CARD_WARNING, INFO_CARD_DANGER, TEXT_SECONDARY, TEXT_SECONDARY_DARK
+from gui.styles import (
+    INFO_CARD_SUCCESS, INFO_CARD_WARNING, INFO_CARD_DANGER,
+    TEXT_SECONDARY, TEXT_SECONDARY_DARK,
+    get_info_card_style
+)
 
 
 class FundamentalTab(QWidget):
@@ -133,7 +137,7 @@ class FundamentalTab(QWidget):
     def analyze(self):
         try:
             if not all([self.price_input.text(), self.eps_input.text()]):
-                QMessageBox.warning(self, "Input Required",
+                self._show_msg(QMessageBox.Icon.Warning, "Input Required",
                     "Please enter at least Current Price and EPS.")
                 return
 
@@ -169,9 +173,9 @@ class FundamentalTab(QWidget):
 
             self._show_results(results)
         except ValueError as e:
-            QMessageBox.critical(self, "Input Error", f"Invalid input: {e}")
+            self._show_msg(QMessageBox.Icon.Critical, "Input Error", f"Invalid input: {e}")
         except Exception as e:
-            QMessageBox.critical(self, "Error", str(e))
+            self._show_msg(QMessageBox.Icon.Critical, "Error", str(e))
 
     def _show_results(self, results):
         self.results_table.setRowCount(0)
@@ -191,11 +195,11 @@ class FundamentalTab(QWidget):
         poor = sum(1 for _, _, r in results if r == "Poor")
 
         if exc + good >= len(results) * 0.6:
-            style, summary = INFO_CARD_SUCCESS, "Strong Fundamentals"
+            style, summary = get_info_card_style('success', self.is_dark), "Strong Fundamentals"
         elif poor >= len(results) * 0.5:
-            style, summary = INFO_CARD_DANGER, "Weak Fundamentals"
+            style, summary = get_info_card_style('danger', self.is_dark), "Weak Fundamentals"
         else:
-            style, summary = INFO_CARD_WARNING, "Mixed Fundamentals"
+            style, summary = get_info_card_style('warning', self.is_dark), "Mixed Fundamentals"
 
         self.results_label.setText(
             f"<div style='{style}'>"
@@ -219,3 +223,12 @@ class FundamentalTab(QWidget):
     def apply_theme(self, dark_mode: bool):
         self.is_dark = dark_mode
         self._update_results_label_style()
+
+    def _show_msg(self, icon, title, text):
+        msg = QMessageBox(self)
+        msg.setWindowTitle(title)
+        msg.setText(text)
+        msg.setIcon(icon)
+        if self.is_dark:
+            msg.setStyleSheet("QLabel { color: #e2e4e7; } QMessageBox { background: #1e293b; }")
+        msg.exec()

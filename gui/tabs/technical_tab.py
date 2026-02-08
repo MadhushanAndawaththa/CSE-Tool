@@ -13,7 +13,12 @@ from PyQt6.QtGui import QDoubleValidator
 import pyqtgraph as pg
 
 from src.calculations.technical import TechnicalAnalyzer
-from gui.styles import INFO_CARD_SUCCESS, INFO_CARD_WARNING, INFO_CARD_DANGER, TEXT_SECONDARY, TEXT_SECONDARY_DARK
+from gui.styles import (
+    INFO_CARD_SUCCESS, INFO_CARD_WARNING, INFO_CARD_DANGER,
+    INFO_CARD_SUCCESS_DARK, INFO_CARD_WARNING_DARK, INFO_CARD_DANGER_DARK,
+    TEXT_SECONDARY, TEXT_SECONDARY_DARK,
+    get_info_card_style
+)
 
 
 class TechnicalTab(QWidget):
@@ -144,7 +149,7 @@ class TechnicalTab(QWidget):
         try:
             price_text = self.price_data_input.toPlainText().strip()
             if not price_text:
-                QMessageBox.warning(self, "Input Error", "Please enter price data.")
+                self._show_msg(QMessageBox.Icon.Warning, "Input Error", "Please enter price data.")
                 return
 
             prices = []
@@ -154,11 +159,11 @@ class TechnicalTab(QWidget):
                     try:
                         prices.append(float(line))
                     except ValueError:
-                        QMessageBox.warning(self, "Input Error", f"Invalid price: {line}")
+                        self._show_msg(QMessageBox.Icon.Warning, "Input Error", f"Invalid price: {line}")
                         return
 
             if len(prices) < 14:
-                QMessageBox.warning(self, "Insufficient Data",
+                self._show_msg(QMessageBox.Icon.Warning, "Insufficient Data",
                     "Need at least 14 prices for technical analysis.")
                 return
 
@@ -186,12 +191,12 @@ class TechnicalTab(QWidget):
                 plot_data["ma50"] = self.calculate_sma(prices, 50)
 
             if not results:
-                QMessageBox.warning(self, "Analysis Error", "Could not calculate indicators.")
+                self._show_msg(QMessageBox.Icon.Warning, "Analysis Error", "Could not calculate indicators.")
                 return
 
             self._show_results(results, prices, plot_data)
         except Exception as e:
-            QMessageBox.critical(self, "Error", str(e))
+            self._show_msg(QMessageBox.Icon.Critical, "Error", str(e))
 
     def _show_results(self, results, prices, plot_data):
         self.results_table.setRowCount(0)
@@ -212,11 +217,11 @@ class TechnicalTab(QWidget):
         self.results_table.resizeColumnsToContents()
 
         if buy > sell:
-            style, summary, msg = INFO_CARD_SUCCESS, "Bullish Signals", f"Buy: {buy}, Sell: {sell}"
+            style, summary, msg = get_info_card_style('success', self.is_dark), "Bullish Signals", f"Buy: {buy}, Sell: {sell}"
         elif sell > buy:
-            style, summary, msg = INFO_CARD_DANGER, "Bearish Signals", f"Sell: {sell}, Buy: {buy}"
+            style, summary, msg = get_info_card_style('danger', self.is_dark), "Bearish Signals", f"Sell: {sell}, Buy: {buy}"
         else:
-            style, summary, msg = INFO_CARD_WARNING, "Neutral Signals", "Mixed signals"
+            style, summary, msg = get_info_card_style('warning', self.is_dark), "Neutral Signals", "Mixed signals"
 
         self.results_label.setText(
             f"<div style='{style}'><b>{summary}</b><br>"
@@ -252,6 +257,15 @@ class TechnicalTab(QWidget):
         self._update_results_label_style()
         self._update_instructions_style()
         self._update_plot_theme()
+
+    def _show_msg(self, icon, title, text):
+        msg = QMessageBox(self)
+        msg.setWindowTitle(title)
+        msg.setText(text)
+        msg.setIcon(icon)
+        if self.is_dark:
+            msg.setStyleSheet("QLabel { color: #e2e4e7; } QMessageBox { background: #1e293b; }")
+        msg.exec()
 
     def _update_plot_theme(self):
         ac = "#cbd5e1" if self.is_dark else "#475569"
