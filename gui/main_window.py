@@ -224,10 +224,13 @@ class MainWindow(QMainWindow):
 
     def toggle_theme(self, checked):
         self.apply_theme(checked)
-        if self.dark_mode_action.isChecked() != checked:
-            self.dark_mode_action.setChecked(checked)
-        if self.theme_toolbar_action.isChecked() != checked:
-            self.theme_toolbar_action.setChecked(checked)
+        # Sync both toggle actions without re-firing signals
+        self.dark_mode_action.blockSignals(True)
+        self.dark_mode_action.setChecked(checked)
+        self.dark_mode_action.blockSignals(False)
+        self.theme_toolbar_action.blockSignals(True)
+        self.theme_toolbar_action.setChecked(checked)
+        self.theme_toolbar_action.blockSignals(False)
 
     def apply_theme(self, dark_mode: bool):
         app = QApplication.instance()
