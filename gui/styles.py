@@ -658,6 +658,13 @@ CARD_STYLE = f"""
     padding: 12px;
 """
 
+CARD_STYLE_DARK = f"""
+    background-color: {_D_SURFACE};
+    border: 1px solid {_D_BORDER};
+    border-radius: 8px;
+    padding: 12px;
+"""
+
 INFO_CARD_SUCCESS = f"""
     background-color: {SUCCESS_LIGHT};
     border-left: 4px solid {SUCCESS};

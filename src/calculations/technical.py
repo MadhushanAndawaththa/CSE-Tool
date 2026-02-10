@@ -69,7 +69,8 @@ class TechnicalAnalyzer:
         rs = avg_gain / avg_loss
         rsi = 100 - (100 / (1 + rs))
         
-        current_rsi = rsi.iloc[-1]
+        rsi_series = rsi  # keep as Series for Pyre2
+        current_rsi = float(rsi_series.iloc[-1])
         
         # Interpret RSI
         rsi_thresholds = self.thresholds['rsi']
@@ -100,7 +101,7 @@ class TechnicalAnalyzer:
             recommendation = 'SELL - Stock may be overvalued'
         
         return {
-            'rsi': round(current_rsi, 2),
+            'rsi': round(float(current_rsi), 2),
             'score': score,
             'signal': signal,
             'interpretation': interpretation,
@@ -152,13 +153,13 @@ class TechnicalAnalyzer:
         # Calculate histogram
         histogram = macd_line - signal_line
         
-        current_macd = macd_line.iloc[-1]
-        current_signal = signal_line.iloc[-1]
-        current_histogram = histogram.iloc[-1]
+        current_macd = float(macd_line.iloc[-1])
+        current_signal = float(signal_line.iloc[-1])
+        current_histogram = float(histogram.iloc[-1])
         
         # Check for crossovers (if we have previous values)
         if len(histogram) > 1:
-            prev_histogram = histogram.iloc[-2]
+            prev_histogram = float(histogram.iloc[-2])
             
             if current_histogram > 0 and prev_histogram <= 0:
                 score = 85
@@ -193,9 +194,9 @@ class TechnicalAnalyzer:
                 recommendation = 'Negative momentum'
         
         return {
-            'macd': round(current_macd, 4),
-            'signal_line': round(current_signal, 4),
-            'histogram': round(current_histogram, 4),
+            'macd': round(float(current_macd), 4),
+            'signal_line': round(float(current_signal), 4),
+            'histogram': round(float(current_histogram), 4),
             'score': score,
             'signal': signal_type,
             'interpretation': interpretation,
@@ -229,7 +230,7 @@ class TechnicalAnalyzer:
         # Calculate short-term MA
         if len(prices) >= short_period:
             short_ma = sum(prices[-short_period:]) / short_period
-            results['short_ma'] = round(short_ma, 2)
+            results['short_ma'] = round(float(short_ma), 2)
             
             # Compare price to short MA
             if current_price > short_ma:
@@ -245,7 +246,7 @@ class TechnicalAnalyzer:
         # Calculate long-term MA
         if len(prices) >= long_period:
             long_ma = sum(prices[-long_period:]) / long_period
-            results['long_ma'] = round(long_ma, 2)
+            results['long_ma'] = round(float(long_ma), 2)
             
             # Compare price to long MA
             if current_price > long_ma:
@@ -261,7 +262,9 @@ class TechnicalAnalyzer:
         # Determine overall trend and signal
         if short_trend and long_trend:
             # Check for golden cross or death cross
-            if results['short_ma'] > results['long_ma']:
+            short_ma_val: float = results['short_ma']  # type: ignore[assignment]
+            long_ma_val: float = results['long_ma']  # type: ignore[assignment]
+            if short_ma_val > long_ma_val:
                 # Check if it's a recent crossover (golden cross)
                 if len(prices) >= long_period + 1:
                     prev_short = sum(prices[-short_period-1:-1]) / short_period
@@ -279,7 +282,7 @@ class TechnicalAnalyzer:
                 results['interpretation'] = f'Bullish trend - Price and {short_period}-MA above {long_period}-MA'
                 results['recommendation'] = 'BUY - Strong uptrend'
             
-            elif results['short_ma'] < results['long_ma']:
+            elif short_ma_val < long_ma_val:
                 # Check for death cross
                 if len(prices) >= long_period + 1:
                     prev_short = sum(prices[-short_period-1:-1]) / short_period
@@ -399,9 +402,9 @@ class TechnicalAnalyzer:
                 volume_trend = 'Average volume, range-bound'
         
         return {
-            'average_volume': round(avg_volume, 2),
+            'average_volume': round(float(avg_volume), 2),
             'current_volume': current_volume,
-            'volume_ratio': round(volume_ratio, 2),
+            'volume_ratio': round(float(volume_ratio), 2),
             'volume_trend': volume_trend,
             'score': score,
             'interpretation': interpretation,
@@ -444,9 +447,9 @@ class TechnicalAnalyzer:
         lower_band = middle_band - (std_dev * num_std)
         
         current_price = prices[-1]
-        current_upper = upper_band.iloc[-1]
-        current_lower = lower_band.iloc[-1]
-        current_middle = middle_band.iloc[-1]
+        current_upper = float(upper_band.iloc[-1])
+        current_lower = float(lower_band.iloc[-1])
+        current_middle = float(middle_band.iloc[-1])
         
         # Interpretation
         bandwidth = (current_upper - current_lower) / current_middle
@@ -474,10 +477,10 @@ class TechnicalAnalyzer:
             recommendation = 'HOLD - Downtrend'
             
         return {
-            'upper': round(current_upper, 2),
-            'middle': round(current_middle, 2),
-            'lower': round(current_lower, 2),
-            'bandwidth': round(bandwidth, 4),
+            'upper': round(float(current_upper), 2),
+            'middle': round(float(current_middle), 2),
+            'lower': round(float(current_lower), 2),
+            'bandwidth': round(float(bandwidth), 4),
             'score': score,
             'signal': signal,
             'interpretation': interpretation,
@@ -534,8 +537,8 @@ class TechnicalAnalyzer:
         # Calculate %D (3-day SMA of %K)
         d_percent = k_percent.rolling(window=d_period).mean()
         
-        current_k = k_percent.iloc[-1]
-        current_d = d_percent.iloc[-1]
+        current_k = float(k_percent.iloc[-1])
+        current_d = float(d_percent.iloc[-1])
         
         # Handle NaN values at start
         if pd.isna(current_k) or pd.isna(current_d):
@@ -571,8 +574,8 @@ class TechnicalAnalyzer:
             recommendation = 'SELL/HOLD'
             
         return {
-            'k': round(current_k, 2),
-            'd': round(current_d, 2),
+            'k': round(float(current_k), 2),
+            'd': round(float(current_d), 2),
             'score': score,
             'signal': signal,
             'interpretation': interpretation,
@@ -641,7 +644,7 @@ class TechnicalAnalyzer:
         
         return {
             'indicators': results,
-            'overall_score': round(overall_score, 2),
+            'overall_score': round(float(overall_score), 2),
             'overall_signal': overall_signal,
             'overall_recommendation': overall_recommendation,
             'indicators_analyzed': len(results)

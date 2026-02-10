@@ -136,7 +136,7 @@ class RecommendationEngine:
             risk_interpretation = 'Significant risk factors - suitable for aggressive investors only'
         
         return {
-            'risk_score': round(risk_score, 2),
+            'risk_score': round(float(risk_score), 2),
             'risk_level': risk_level,
             'risk_interpretation': risk_interpretation,
             'risk_factors': risk_details,
@@ -162,26 +162,32 @@ class RecommendationEngine:
         Returns:
             dict: Complete recommendation with scores and rationale
         """
-        recommendation = {
-            'stock_info': {},
+        # Use separate typed containers to avoid Pyre2 mixed-type dict issues
+        stock_info: dict[str, object] = {}
+        key_strengths: list[str] = []
+        key_concerns: list[str] = []
+        action_items: list[str] = []
+        
+        recommendation: dict[str, object] = {
+            'stock_info': stock_info,
             'fundamental_analysis': None,
             'technical_analysis': None,
             'risk_assessment': None,
             'overall_score': 0,
             'recommendation': 'N/A',
             'confidence': 'N/A',
-            'key_strengths': [],
-            'key_concerns': [],
-            'action_items': []
+            'key_strengths': key_strengths,
+            'key_concerns': key_concerns,
+            'action_items': action_items
         }
         
         # Store stock info
         if 'ticker' in stock_data:
-            recommendation['stock_info']['ticker'] = stock_data['ticker']
+            stock_info['ticker'] = stock_data['ticker']
         if 'company_name' in stock_data:
-            recommendation['stock_info']['company_name'] = stock_data['company_name']
+            stock_info['company_name'] = stock_data['company_name']
         if 'price' in stock_data:
-            recommendation['stock_info']['current_price'] = stock_data['price']
+            stock_info['current_price'] = stock_data['price']
         
         # Perform fundamental analysis
         fundamental_result = self.fundamental_analyzer.comprehensive_analysis(stock_data)
@@ -212,104 +218,104 @@ class RecommendationEngine:
             technical_score * self.weights['technical'] +
             risk_score * self.weights['risk']
         )
-        recommendation['overall_score'] = round(overall_score, 2)
+        recommendation['overall_score'] = round(float(overall_score), 2)
         
         # Generate overall recommendation
         if overall_score >= 80:
             recommendation['recommendation'] = 'STRONG BUY'
             recommendation['confidence'] = 'HIGH'
-            recommendation['action_items'].append('Consider establishing or adding to position')
+            action_items.append('Consider establishing or adding to position')
         elif overall_score >= 70:
             recommendation['recommendation'] = 'BUY'
             recommendation['confidence'] = 'MODERATE-HIGH'
-            recommendation['action_items'].append('Good opportunity to buy')
+            action_items.append('Good opportunity to buy')
         elif overall_score >= 55:
             recommendation['recommendation'] = 'HOLD'
             recommendation['confidence'] = 'MODERATE'
-            recommendation['action_items'].append('Maintain current position if owned')
-            recommendation['action_items'].append('Wait for better entry point if not owned')
+            action_items.append('Maintain current position if owned')
+            action_items.append('Wait for better entry point if not owned')
         elif overall_score >= 40:
             recommendation['recommendation'] = 'SELL'
             recommendation['confidence'] = 'MODERATE-HIGH'
-            recommendation['action_items'].append('Consider reducing position')
+            action_items.append('Consider reducing position')
         else:
             recommendation['recommendation'] = 'STRONG SELL'
             recommendation['confidence'] = 'HIGH'
-            recommendation['action_items'].append('Exit position or avoid purchasing')
+            action_items.append('Exit position or avoid purchasing')
         
         # Identify key strengths
         if fundamental_score >= 75:
-            recommendation['key_strengths'].append('Strong fundamental metrics')
+            key_strengths.append('Strong fundamental metrics')
         if technical_score >= 70:
-            recommendation['key_strengths'].append('Positive technical indicators')
+            key_strengths.append('Positive technical indicators')
         if risk_score >= 70:
-            recommendation['key_strengths'].append('Low risk profile')
+            key_strengths.append('Low risk profile')
             
         # Add specific strengths from technical analysis
         if technical_result:
             # RSS check
             rsi_data = technical_result['indicators'].get('rsi', {})
             if rsi_data and rsi_data.get('score', 0) >= 80:
-                recommendation['key_strengths'].append(f"RSI: {rsi_data.get('interpretation')}")
+                key_strengths.append(f"RSI: {rsi_data.get('interpretation')}")
                 
             # MACD check
             macd_data = technical_result['indicators'].get('macd', {})
             if macd_data and macd_data.get('score', 0) >= 80:
-                recommendation['key_strengths'].append("Bullish MACD crossover")
+                key_strengths.append("Bullish MACD crossover")
                 
             # Bollinger check
             bb_data = technical_result['indicators'].get('bollinger', {})
             if bb_data and bb_data.get('score', 0) >= 80:
-                recommendation['key_strengths'].append("Price near lower Bollinger Band (Oversold)")
+                key_strengths.append("Price near lower Bollinger Band (Oversold)")
                 
             # Stochastic check
             stoch_data = technical_result['indicators'].get('stochastic', {})
             if stoch_data and stoch_data.get('score', 0) >= 80:
-                recommendation['key_strengths'].append("Stochastic Oversold")
+                key_strengths.append("Stochastic Oversold")
         
         # Add specific strengths from fundamental analysis
         if fundamental_result.get('metrics'):
             for metric_name, metric_data in fundamental_result['metrics'].items():
                 if isinstance(metric_data, dict) and metric_data.get('score', 0) >= 80:
-                    recommendation['key_strengths'].append(
+                    key_strengths.append(
                         f"{metric_name.upper()}: {metric_data.get('interpretation', 'Good')}"
                     )
         
         # Identify key concerns
         if fundamental_score < 50:
-            recommendation['key_concerns'].append('Weak fundamental metrics')
+            key_concerns.append('Weak fundamental metrics')
         if technical_score < 45:
-            recommendation['key_concerns'].append('Negative technical signals')
+            key_concerns.append('Negative technical signals')
         if risk_score < 50:
-            recommendation['key_concerns'].append('Elevated risk factors')
+            key_concerns.append('Elevated risk factors')
             
         # Add specific concerns from technical analysis
         if technical_result:
             # RSI check
             rsi_data = technical_result['indicators'].get('rsi', {})
             if rsi_data and rsi_data.get('score', 100) <= 25:
-                recommendation['key_concerns'].append(f"RSI: {rsi_data.get('interpretation')}")
+                key_concerns.append(f"RSI: {rsi_data.get('interpretation')}")
                 
             # MACD check
             macd_data = technical_result['indicators'].get('macd', {})
             if macd_data and macd_data.get('score', 100) <= 25:
-                recommendation['key_concerns'].append("Bearish MACD crossover")
+                key_concerns.append("Bearish MACD crossover")
                 
             # Bollinger check
             bb_data = technical_result['indicators'].get('bollinger', {})
             if bb_data and bb_data.get('score', 100) <= 40:
-                recommendation['key_concerns'].append("Price near upper Bollinger Band (Overbought)")
+                key_concerns.append("Price near upper Bollinger Band (Overbought)")
                 
             # Stochastic check
             stoch_data = technical_result['indicators'].get('stochastic', {})
             if stoch_data and stoch_data.get('score', 100) <= 30:
-                recommendation['key_concerns'].append("Stochastic Overbought")
+                key_concerns.append("Stochastic Overbought")
         
         # Add specific concerns from fundamental analysis
         if fundamental_result.get('metrics'):
             for metric_name, metric_data in fundamental_result['metrics'].items():
                 if isinstance(metric_data, dict) and metric_data.get('score', 100) <= 40:
-                    recommendation['key_concerns'].append(
+                    key_concerns.append(
                         f"{metric_name.upper()}: {metric_data.get('interpretation', 'Concerning')}"
                     )
         
@@ -317,11 +323,11 @@ class RecommendationEngine:
         if risk_result.get('risk_factors'):
             for factor in risk_result['risk_factors']:
                 if 'high' in factor.lower() or 'concern' in factor.lower():
-                    recommendation['key_concerns'].append(factor)
+                    key_concerns.append(factor)
         
         # Limit to top 5 strengths and concerns for readability
-        recommendation['key_strengths'] = recommendation['key_strengths'][:5]
-        recommendation['key_concerns'] = recommendation['key_concerns'][:5]
+        recommendation['key_strengths'] = key_strengths[:5]
+        recommendation['key_concerns'] = key_concerns[:5]
         
         return recommendation
     
