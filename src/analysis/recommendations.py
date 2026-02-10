@@ -244,6 +244,28 @@ class RecommendationEngine:
             recommendation['key_strengths'].append('Positive technical indicators')
         if risk_score >= 70:
             recommendation['key_strengths'].append('Low risk profile')
+            
+        # Add specific strengths from technical analysis
+        if technical_result:
+            # RSS check
+            rsi_data = technical_result['indicators'].get('rsi', {})
+            if rsi_data and rsi_data.get('score', 0) >= 80:
+                recommendation['key_strengths'].append(f"RSI: {rsi_data.get('interpretation')}")
+                
+            # MACD check
+            macd_data = technical_result['indicators'].get('macd', {})
+            if macd_data and macd_data.get('score', 0) >= 80:
+                recommendation['key_strengths'].append("Bullish MACD crossover")
+                
+            # Bollinger check
+            bb_data = technical_result['indicators'].get('bollinger', {})
+            if bb_data and bb_data.get('score', 0) >= 80:
+                recommendation['key_strengths'].append("Price near lower Bollinger Band (Oversold)")
+                
+            # Stochastic check
+            stoch_data = technical_result['indicators'].get('stochastic', {})
+            if stoch_data and stoch_data.get('score', 0) >= 80:
+                recommendation['key_strengths'].append("Stochastic Oversold")
         
         # Add specific strengths from fundamental analysis
         if fundamental_result.get('metrics'):
@@ -260,6 +282,28 @@ class RecommendationEngine:
             recommendation['key_concerns'].append('Negative technical signals')
         if risk_score < 50:
             recommendation['key_concerns'].append('Elevated risk factors')
+            
+        # Add specific concerns from technical analysis
+        if technical_result:
+            # RSI check
+            rsi_data = technical_result['indicators'].get('rsi', {})
+            if rsi_data and rsi_data.get('score', 100) <= 25:
+                recommendation['key_concerns'].append(f"RSI: {rsi_data.get('interpretation')}")
+                
+            # MACD check
+            macd_data = technical_result['indicators'].get('macd', {})
+            if macd_data and macd_data.get('score', 100) <= 25:
+                recommendation['key_concerns'].append("Bearish MACD crossover")
+                
+            # Bollinger check
+            bb_data = technical_result['indicators'].get('bollinger', {})
+            if bb_data and bb_data.get('score', 100) <= 40:
+                recommendation['key_concerns'].append("Price near upper Bollinger Band (Overbought)")
+                
+            # Stochastic check
+            stoch_data = technical_result['indicators'].get('stochastic', {})
+            if stoch_data and stoch_data.get('score', 100) <= 30:
+                recommendation['key_concerns'].append("Stochastic Overbought")
         
         # Add specific concerns from fundamental analysis
         if fundamental_result.get('metrics'):

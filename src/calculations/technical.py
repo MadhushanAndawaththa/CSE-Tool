@@ -407,6 +407,177 @@ class TechnicalAnalyzer:
             'interpretation': interpretation,
             'recommendation': recommendation
         }
+
+    def calculate_bollinger_bands(self, prices, period=20, num_std=2):
+        """
+        Calculate Bollinger Bands (Middle, Upper, Lower).
+        
+        Args:
+            prices: List of historical prices (most recent last)
+            period: Moving average period (default: 20)
+            num_std: Number of standard deviations (default: 2)
+        
+        Returns:
+            dict: Bands values and interpretation
+        """
+        if len(prices) < period:
+            return {
+                'upper': None,
+                'middle': None,
+                'lower': None,
+                'score': 50,
+                'signal': 'NEUTRAL',
+                'interpretation': f'Insufficient data (need at least {period} prices)',
+                'recommendation': 'N/A'
+            }
+        
+        price_series = pd.Series(prices)
+        
+        # Calculate Middle Band (SMA)
+        middle_band = price_series.rolling(window=period).mean()
+        
+        # Calculate Standard Deviation
+        std_dev = price_series.rolling(window=period).std()
+        
+        # Calculate Upper and Lower Bands
+        upper_band = middle_band + (std_dev * num_std)
+        lower_band = middle_band - (std_dev * num_std)
+        
+        current_price = prices[-1]
+        current_upper = upper_band.iloc[-1]
+        current_lower = lower_band.iloc[-1]
+        current_middle = middle_band.iloc[-1]
+        
+        # Interpretation
+        bandwidth = (current_upper - current_lower) / current_middle
+        
+        # Determine signal based on price position relative to bands
+        if current_price >= current_upper:
+            score = 30
+            signal = 'SELL'
+            interpretation = 'Price touching/above upper band - potential overbought'
+            recommendation = 'Consider taking profits'
+        elif current_price <= current_lower:
+            score = 80
+            signal = 'BUY'
+            interpretation = 'Price touching/below lower band - potential oversold'
+            recommendation = 'Look for buy opportunities'
+        elif current_price > current_middle:
+            score = 60
+            signal = 'NEUTRAL-BULLISH'
+            interpretation = 'Price in upper channel'
+            recommendation = 'HOLD - Uptrend'
+        else:
+            score = 40
+            signal = 'NEUTRAL-BEARISH'
+            interpretation = 'Price in lower channel'
+            recommendation = 'HOLD - Downtrend'
+            
+        return {
+            'upper': round(current_upper, 2),
+            'middle': round(current_middle, 2),
+            'lower': round(current_lower, 2),
+            'bandwidth': round(bandwidth, 4),
+            'score': score,
+            'signal': signal,
+            'interpretation': interpretation,
+            'recommendation': recommendation
+        }
+
+    def calculate_stochastic(self, prices, high_prices=None, low_prices=None, k_period=14, d_period=3):
+        """
+        Calculate Stochastic Oscillator (%K and %D).
+        
+        If high/low prices not provided, estimates using close prices (less accurate).
+        
+        Args:
+            prices: List of close prices
+            high_prices: List of high prices (optional)
+            low_prices: List of low prices (optional)
+            k_period: Lookback period for %K (default: 14)
+            d_period: Smoothing period for %D (default: 3)
+            
+        Returns:
+            dict: Stochastic values and interpretation
+        """
+        if len(prices) < k_period:
+            return {
+                'k': None,
+                'd': None,
+                'score': 50,
+                'signal': 'NEUTRAL',
+                'interpretation': f'Insufficient data (need at least {k_period} prices)',
+                'recommendation': 'N/A'
+            }
+            
+        close_series = pd.Series(prices)
+        
+        # Use provided high/low or estimate from close (not ideal but functional fallback)
+        if high_prices and len(high_prices) == len(prices):
+            high_series = pd.Series(high_prices)
+        else:
+            high_series = close_series
+            
+        if low_prices and len(low_prices) == len(prices):
+            low_series = pd.Series(low_prices)
+        else:
+            low_series = close_series
+            
+        # Calculate Lowest Low and Highest High over k_period
+        lowest_low = low_series.rolling(window=k_period).min()
+        highest_high = high_series.rolling(window=k_period).max()
+        
+        # Calculate %K
+        # %K = (Current Close - Lowest Low) / (Highest High - Lowest Low) * 100
+        k_percent = 100 * ((close_series - lowest_low) / (highest_high - lowest_low))
+        
+        # Calculate %D (3-day SMA of %K)
+        d_percent = k_percent.rolling(window=d_period).mean()
+        
+        current_k = k_percent.iloc[-1]
+        current_d = d_percent.iloc[-1]
+        
+        # Handle NaN values at start
+        if pd.isna(current_k) or pd.isna(current_d):
+             return {
+                'k': None, # Keep as None or handle gracefully
+                'd': None,
+                'score': 50,
+                'signal': 'NEUTRAL',
+                'interpretation': 'Calculation pending more data', 
+                'recommendation': 'N/A'
+            }
+
+        # Interpretation
+        if current_k < 20 and current_d < 20:
+            score = 85
+            signal = 'STRONG BUY'
+            interpretation = 'Oversold zone - potential reversal up'
+            recommendation = 'BUY - Oversold'
+        elif current_k > 80 and current_d > 80:
+            score = 25
+            signal = 'STRONG SELL'
+            interpretation = 'Overbought zone - potential reversal down'
+            recommendation = 'SELL - Overbought'
+        elif current_k > current_d:
+            score = 65
+            signal = 'BUY'
+            interpretation = '%K above %D (Bullish momentum)'
+            recommendation = 'BUY/HOLD'
+        else:
+            score = 45
+            signal = 'SELL'
+            interpretation = '%K below %D (Bearish momentum)'
+            recommendation = 'SELL/HOLD'
+            
+        return {
+            'k': round(current_k, 2),
+            'd': round(current_d, 2),
+            'score': score,
+            'signal': signal,
+            'interpretation': interpretation,
+            'recommendation': recommendation
+        }
     
     def comprehensive_analysis(self, prices, volumes=None):
         """
@@ -433,6 +604,12 @@ class TechnicalAnalyzer:
         # Volume Analysis (if provided)
         if volumes and len(volumes) == len(prices):
             results['volume'] = self.calculate_volume_analysis(prices, volumes)
+            
+        # Bollinger Bands
+        results['bollinger'] = self.calculate_bollinger_bands(prices)
+        
+        # Stochastic Oscillator
+        results['stochastic'] = self.calculate_stochastic(prices)
         
         # Calculate overall technical score
         scores = []
