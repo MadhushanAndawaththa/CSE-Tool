@@ -9,12 +9,13 @@ from src.calculations.fundamental import FundamentalAnalyzer
 from src.calculations.technical import TechnicalAnalyzer
 from src.calculations.breakeven import BreakEvenCalculator
 from src.utils.helpers import load_config
+from typing import Any, Dict, List, Optional
 
 
 class RecommendationEngine:
     """Generate stock recommendations based on comprehensive analysis."""
     
-    def __init__(self, custom_config=None):
+    def __init__(self, custom_config: Optional[Dict[str, Any]] = None) -> None:
         """
         Initialize recommendation engine.
         
@@ -29,7 +30,7 @@ class RecommendationEngine:
         # Get weights from config
         self.weights = self.config['thresholds']['weights']
     
-    def calculate_risk_score(self, stock_data):
+    def calculate_risk_score(self, stock_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Calculate risk score based on various risk factors.
         
@@ -143,7 +144,7 @@ class RecommendationEngine:
             'factors_analyzed': len(risk_factors)
         }
     
-    def generate_recommendation(self, stock_data, prices=None, volumes=None):
+    def generate_recommendation(self, stock_data: Dict[str, Any], prices: Optional[List[float]] = None, volumes: Optional[List[float]] = None) -> Dict[str, Any]:
         """
         Generate comprehensive stock recommendation.
         
@@ -167,6 +168,7 @@ class RecommendationEngine:
         key_strengths: list[str] = []
         key_concerns: list[str] = []
         action_items: list[str] = []
+        technical_result = None
         
         recommendation: dict[str, object] = {
             'stock_info': stock_info,
@@ -331,7 +333,7 @@ class RecommendationEngine:
         
         return recommendation
     
-    def compare_to_breakeven(self, stock_data, buy_price, quantity):
+    def compare_to_breakeven(self, stock_data: Dict[str, Any], buy_price: float, quantity: float) -> Dict[str, Any]:
         """
         Compare current price to break-even and provide recommendation.
         
@@ -394,7 +396,7 @@ class RecommendationEngine:
             'profit_details': profit_result
         }
     
-    def calculate_entry_price(self, stock_data, target_profit_percentage=15):
+    def calculate_entry_price(self, stock_data: Dict[str, Any], target_profit_percentage: float = 15) -> Dict[str, Any]:
         """
         Calculate ideal entry price for a target profit.
         

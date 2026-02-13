@@ -6,7 +6,7 @@ import yaml
 from pathlib import Path
 
 
-def load_config():
+def load_config() -> dict:
     """Load configuration from config.yaml file."""
     config_path = Path(__file__).parent.parent.parent / 'config.yaml'
     
@@ -20,17 +20,17 @@ def load_config():
         raise ValueError(f"Error parsing configuration file: {e}")
 
 
-def format_currency(amount, currency='LKR'):
+def format_currency(amount: float, currency: str = 'LKR') -> str:
     """Format amount as currency with thousands separator."""
     return f"{currency} {amount:,.2f}"
 
 
-def format_percentage(value, decimal_places=2):
+def format_percentage(value: float, decimal_places: int = 2) -> str:
     """Format decimal value as percentage."""
     return f"{value * 100:.{decimal_places}f}%"
 
 
-def validate_positive_number(value, name):
+def validate_positive_number(value: float | int, name: str) -> bool:
     """Validate that a value is a positive number."""
     if not isinstance(value, (int, float)):
         raise TypeError(f"{name} must be a number")
@@ -39,7 +39,7 @@ def validate_positive_number(value, name):
     return True
 
 
-def validate_non_negative_number(value, name):
+def validate_non_negative_number(value: float | int, name: str) -> bool:
     """Validate that a value is a non-negative number."""
     if not isinstance(value, (int, float)):
         raise TypeError(f"{name} must be a number")
@@ -48,7 +48,7 @@ def validate_non_negative_number(value, name):
     return True
 
 
-def color_text(text, color='green'):
+def color_text(text: str, color: str = 'green') -> str:
     """Return colored text for terminal output."""
     try:
         from colorama import Fore, Style, init
@@ -68,7 +68,7 @@ def color_text(text, color='green'):
         return text
 
 
-def get_data_dir():
+def get_data_dir() -> Path:
     """Get the data directory path."""
     data_dir = Path(__file__).parent.parent.parent / 'data'
     data_dir.mkdir(exist_ok=True)

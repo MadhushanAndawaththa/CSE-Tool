@@ -7,12 +7,13 @@ capital gains tax.
 """
 
 from src.utils.helpers import load_config, validate_positive_number
+from typing import Any, Dict, Optional
 
 
 class CSEFeeCalculator:
     """Calculate CSE trading fees and taxes."""
     
-    def __init__(self, custom_config=None):
+    def __init__(self, custom_config: Optional[Dict[str, Any]] = None) -> None:
         """
         Initialize fee calculator with configuration.
         
@@ -21,7 +22,7 @@ class CSEFeeCalculator:
         """
         self.config = custom_config if custom_config else load_config()
     
-    def _get_fee_rates(self, transaction_value):
+    def _get_fee_rates(self, transaction_value: float) -> Dict[str, float]:
         """
         Get the appropriate fee rates based on transaction value.
         
@@ -46,7 +47,7 @@ class CSEFeeCalculator:
             'stl_tax': tier['stl_tax']
         }
     
-    def calculate_buy_fees(self, transaction_value, quantity=1):
+    def calculate_buy_fees(self, transaction_value: float, quantity: float = 1) -> Dict[str, Any]:
         """
         Calculate total fees when buying shares.
         
@@ -90,7 +91,7 @@ class CSEFeeCalculator:
             'tier': 'Tier 1 (≤ Rs. 100Mn)' if transaction_value <= self.config['cse_fees']['tier_1']['max_value'] else 'Tier 2 (> Rs. 100Mn)'
         }
     
-    def calculate_sell_fees(self, transaction_value, quantity=1):
+    def calculate_sell_fees(self, transaction_value: float, quantity: float = 1) -> Dict[str, Any]:
         """
         Calculate total fees when selling shares (includes STL tax).
         

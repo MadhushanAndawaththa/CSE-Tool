@@ -14,6 +14,10 @@ from src.calculations.technical import TechnicalAnalyzer
 from src.analysis.recommendations import RecommendationEngine
 from src.fees.cse_fees import CSEFeeCalculator
 from src.utils.helpers import format_currency, format_percentage, color_text
+from src.utils.logger import setup_logging, get_logger
+
+# Initialize logger
+logger = get_logger(__name__)
 
 # Initialize colorama for Windows support
 init(autoreset=True)
@@ -462,6 +466,9 @@ def show_fee_structure():
 
 def main():
     """Main application entry point."""
+    setup_logging(log_file_prefix="cse_cli")
+    logger.info("Starting CSE Stock Analyzer CLI")
+    
     try:
         while True:
             display_menu()
@@ -488,8 +495,10 @@ def main():
     
     except KeyboardInterrupt:
         print("\n\n" + color_text("Program interrupted by user.", 'yellow'))
+        logger.info("Program interrupted by user")
         sys.exit(0)
     except Exception as e:
+        logger.exception("An unhandled error occurred")
         print(color_text(f"\nAn error occurred: {str(e)}", 'red'))
         sys.exit(1)
 
