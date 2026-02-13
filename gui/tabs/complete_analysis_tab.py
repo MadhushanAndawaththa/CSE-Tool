@@ -18,6 +18,10 @@ from gui.styles import (
 )
 
 from src.analysis.recommendations import RecommendationEngine
+from src.storage.database import AnalysisDatabase
+from src.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class CompleteAnalysisTab(QWidget):
@@ -27,6 +31,7 @@ class CompleteAnalysisTab(QWidget):
         super().__init__()
         self.is_dark = False
         self.engine = RecommendationEngine()
+        self.db = AnalysisDatabase()
         self.init_ui()
 
     def init_ui(self):
@@ -377,14 +382,23 @@ class CompleteAnalysisTab(QWidget):
         try:
             result = self.engine.generate_recommendation(stock_data, prices=prices if prices else None)
         except Exception as e:
+            logger.error(f"Analysis failed: {e}")
             self._show_msg("Analysis Error", f"An error occurred during analysis:\n{e}")
             return
+            
+        # Save result to database
+        try:
+            self.db.save_analysis(result)
+            logger.info("Analysis result autosaved to database")
+        except Exception as e:
+            logger.error(f"Failed to autosave analysis: {e}")
 
         # Update the dashboard with real results
         self._display_results(result)
 
     # ── Display results on dashboard ───────────────────────
     def _display_results(self, result):
+        self.last_result = result
         self.placeholder_label.hide()
         self.top_frame.show()
         self.cards_widget.show()

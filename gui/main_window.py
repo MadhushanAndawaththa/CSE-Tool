@@ -4,7 +4,7 @@ Main window for CSE Stock Analyzer GUI application.
 
 from PyQt6.QtWidgets import (
     QMainWindow, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout,
-    QToolBar, QStatusBar, QMessageBox, QLabel, QApplication
+    QToolBar, QStatusBar, QMessageBox, QLabel, QApplication, QFileDialog
 )
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QAction, QColor, QPalette
@@ -20,8 +20,17 @@ from gui.tabs.breakeven_tab import BreakEvenTab
 from gui.tabs.fees_tab import FeesTab
 from gui.tabs.fundamental_tab import FundamentalTab
 from gui.tabs.technical_tab import TechnicalTab
+from gui.tabs.technical_tab import TechnicalTab
 from gui.tabs.complete_analysis_tab import CompleteAnalysisTab
+from gui.tabs.history_tab import HistoryTab
 from gui.styles import GLOBAL_STYLESHEET, GLOBAL_STYLESHEET_DARK
+
+from src.export.pdf_report import generate_pdf_report
+from src.export.pdf_report import generate_pdf_report
+from src.export.csv_export import export_to_csv, export_to_excel
+from src.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class MainWindow(QMainWindow):
@@ -88,13 +97,19 @@ class MainWindow(QMainWindow):
         self.fees_tab = FeesTab()
         self.fundamental_tab = FundamentalTab()
         self.technical_tab = TechnicalTab()
+        self.technical_tab = TechnicalTab()
         self.complete_tab = CompleteAnalysisTab()
+        self.history_tab = HistoryTab()
 
         self.tabs.addTab(self.breakeven_tab, "Break-Even")
         self.tabs.addTab(self.fees_tab, "Fees")
         self.tabs.addTab(self.fundamental_tab, "Fundamental")
         self.tabs.addTab(self.technical_tab, "Technical")
         self.tabs.addTab(self.complete_tab, "Complete Analysis")
+        self.tabs.addTab(self.history_tab, "History")
+        
+        # Connect tab change signal
+        self.tabs.currentChanged.connect(self.on_tab_changed)
 
         root.addWidget(self.tabs, 1)
         central.setLayout(root)
@@ -187,6 +202,7 @@ class MainWindow(QMainWindow):
     # ── Actions ───────────────────────────────────────────────────────
 
     def new_analysis(self):
+        logger.info("User started new analysis")
         self.clear_current_tab()
         self.status_bar.showMessage("Started new analysis", 3000)
 
@@ -267,10 +283,76 @@ class MainWindow(QMainWindow):
             app.setPalette(self.style().standardPalette())  # type: ignore
             app.setStyleSheet(GLOBAL_STYLESHEET)  # type: ignore
         self.dark_mode = dark_mode
+        self.dark_mode = dark_mode
         for tab in [self.breakeven_tab, self.fees_tab, self.fundamental_tab,
-                     self.technical_tab, self.complete_tab]:
+                     self.technical_tab, self.complete_tab, self.history_tab]:
             if hasattr(tab, "apply_theme"):
                 tab.apply_theme(dark_mode)
 
+    def on_tab_changed(self, index):
+        """Handle tab changes."""
+        # Refresh history if history tab (index 5) is selected
+        if self.tabs.widget(index) == self.history_tab:
+            self.history_tab.refresh_history()
+
     def update_status(self, message, timeout=0):
         self.status_bar.showMessage(message, timeout)
+    def export_results(self):
+        """Export analysis results to PDF, CSV, or Excel."""
+        logger.info("User requested export results")
+        # Get result from the active tab (currently only Complete Analysis tab supports full export)
+        # We check if CompleteAnalysisTab has 'last_result' attribute
+        
+        if not hasattr(self.complete_tab, 'last_result') or not self.complete_tab.last_result:
+            logger.warning("Export failed: No analysis results available")
+            QMessageBox.warning(self, "Export Error", "No analysis results available to export.\nPlease run an analysis first.")
+            return
+            
+        result = self.complete_tab.last_result
+        
+        # Open file dialog
+        filepath, filter_type = QFileDialog.getSaveFileName(
+            self,
+            "Export Results",
+            "",
+            "PDF Report (*.pdf);;CSV File (*.csv);;Excel File (*.xlsx)"
+        )
+        
+        if not filepath:
+            logger.info("Export cancelled by user")
+            return
+            
+        try:
+            logger.info(f"Exporting results to {filepath} with filter {filter_type}")
+            if filter_type.startswith("PDF"):
+                if not filepath.lower().endswith('.pdf'):
+                    filepath += '.pdf'
+                saved_path = generate_pdf_report(result, filepath)
+                
+            elif filter_type.startswith("CSV"):
+                if not filepath.lower().endswith('.csv'):
+                    filepath += '.csv'
+                saved_path = export_to_csv(result, filepath)
+                
+            elif filter_type.startswith("Excel"):
+                if not filepath.lower().endswith('.xlsx'):
+                    filepath += '.xlsx'
+                saved_path = export_to_excel(result, filepath)
+                
+            else:
+                # Default to PDF if something weird happens (or infer from extension)
+                if filepath.lower().endswith('.csv'):
+                    saved_path = export_to_csv(result, filepath)
+                elif filepath.lower().endswith('.xlsx'):
+                    saved_path = export_to_excel(result, filepath)
+                else:
+                    if not filepath.lower().endswith('.pdf'):
+                        filepath += '.pdf'
+                    saved_path = generate_pdf_report(result, filepath)
+
+            QMessageBox.information(self, "Export Successful", f"Report saved successfully to:\n{saved_path}")
+            logger.info(f"Export successful to {saved_path}")
+            
+        except Exception as e:
+            logger.exception(f"Export failed: {str(e)}")
+            QMessageBox.critical(self, "Export Failed", f"Failed to export report:\n{str(e)}")
