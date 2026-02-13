@@ -1,0 +1,51 @@
+[project]
+name = "cse-stock-analyzer"
+version = "1.0.0"
+description = "Comprehensive stock analysis tool for the Colombo Stock Exchange"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+dependencies = [
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "PyQt6>=6.6.0",
+    "qtawesome>=1.3.0",
+    "pyqtdarktheme>=2.1.0",
+    "fpdf2>=2.7.0",
+    "openpyxl>=3.1.0",
+    "requests>=2.31.0",
+    "tabulate>=0.9.0",
+    "colorama>=0.4.6",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "black>=23.0",
+    "isort>=5.12",
+    "flake8>=6.0",
+    "mypy>=1.6",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --cov=src"
+pythonpath = ["."]
+
+[tool.black]
+line-length = 100
+target-version = ['py310']
+
+[tool.isort]
+profile = "black"
+line_length = 100
+multi_line_output = 3

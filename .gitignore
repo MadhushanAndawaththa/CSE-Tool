@@ -5,3 +5,12 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+.pytest_cache/
+htmlcov/
+.coverage
+.env
+*.log
+*.db
+data/
+logs/
+.mypy_cache/
