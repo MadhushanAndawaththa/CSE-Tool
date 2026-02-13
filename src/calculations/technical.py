@@ -13,12 +13,13 @@ except ImportError:
     ta = None
 
 from src.utils.helpers import load_config
+from typing import Any, Dict, List, Optional
 
 
 class TechnicalAnalyzer:
     """Calculate and analyze technical indicators."""
     
-    def __init__(self, custom_config=None):
+    def __init__(self, custom_config: Optional[Dict[str, Any]] = None) -> None:
         """
         Initialize technical analyzer.
         
@@ -28,7 +29,7 @@ class TechnicalAnalyzer:
         self.config = custom_config if custom_config else load_config()
         self.thresholds = self.config['thresholds']
     
-    def calculate_rsi(self, prices, period=14):
+    def calculate_rsi(self, prices: List[float], period: int = 14) -> Dict[str, Any]:
         """
         Calculate Relative Strength Index (RSI).
         
@@ -108,7 +109,7 @@ class TechnicalAnalyzer:
             'recommendation': recommendation
         }
     
-    def calculate_macd(self, prices, fast=12, slow=26, signal=9):
+    def calculate_macd(self, prices: List[float], fast: int = 12, slow: int = 26, signal: int = 9) -> Dict[str, Any]:
         """
         Calculate MACD (Moving Average Convergence Divergence).
         
@@ -203,7 +204,7 @@ class TechnicalAnalyzer:
             'recommendation': recommendation
         }
     
-    def calculate_moving_averages(self, prices, short_period=50, long_period=200):
+    def calculate_moving_averages(self, prices: List[float], short_period: int = 50, long_period: int = 200) -> Dict[str, Any]:
         """
         Calculate Simple Moving Averages and identify trends.
         
@@ -318,7 +319,7 @@ class TechnicalAnalyzer:
         
         return results
     
-    def calculate_volume_analysis(self, prices, volumes):
+    def calculate_volume_analysis(self, prices: List[float], volumes: List[float]) -> Dict[str, Any]:
         """
         Analyze volume patterns to confirm price movements.
         
@@ -411,7 +412,7 @@ class TechnicalAnalyzer:
             'recommendation': recommendation
         }
 
-    def calculate_bollinger_bands(self, prices, period=20, num_std=2):
+    def calculate_bollinger_bands(self, prices: List[float], period: int = 20, num_std: int = 2) -> Dict[str, Any]:
         """
         Calculate Bollinger Bands (Middle, Upper, Lower).
         
@@ -487,7 +488,7 @@ class TechnicalAnalyzer:
             'recommendation': recommendation
         }
 
-    def calculate_stochastic(self, prices, high_prices=None, low_prices=None, k_period=14, d_period=3):
+    def calculate_stochastic(self, prices: List[float], high_prices: Optional[List[float]] = None, low_prices: Optional[List[float]] = None, k_period: int = 14, d_period: int = 3) -> Dict[str, Any]:
         """
         Calculate Stochastic Oscillator (%K and %D).
         
@@ -582,7 +583,7 @@ class TechnicalAnalyzer:
             'recommendation': recommendation
         }
     
-    def comprehensive_analysis(self, prices, volumes=None):
+    def comprehensive_analysis(self, prices: List[float], volumes: Optional[List[float]] = None) -> Dict[str, Any]:
         """
         Perform comprehensive technical analysis.
         

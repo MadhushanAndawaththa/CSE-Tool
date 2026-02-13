@@ -6,7 +6,9 @@ after accounting for all CSE trading fees and taxes.
 """
 
 from src.fees.cse_fees import CSEFeeCalculator
+from src.fees.cse_fees import CSEFeeCalculator
 from src.utils.helpers import validate_positive_number
+from typing import Any, Dict, Optional
 
 # Constants for iterative calculations
 MAX_ITERATIONS = 20  # Maximum iterations for break-even convergence
@@ -16,7 +18,7 @@ CONVERGENCE_TOLERANCE = 0.01  # Tolerance for profit calculation (LKR)
 class BreakEvenCalculator:
     """Calculate break-even price for stock positions."""
     
-    def __init__(self, custom_config=None):
+    def __init__(self, custom_config: Optional[Dict[str, Any]] = None) -> None:
         """
         Initialize break-even calculator.
         
@@ -26,7 +28,7 @@ class BreakEvenCalculator:
         self.fee_calculator = CSEFeeCalculator(custom_config)
         self.config = self.fee_calculator.config
     
-    def calculate_breakeven_price(self, buy_price, quantity, include_tax=True):
+    def calculate_breakeven_price(self, buy_price: float, quantity: float, include_tax: bool = True) -> Dict[str, Any]:
         """
         Calculate the minimum selling price to break even.
         

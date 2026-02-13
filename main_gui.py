@@ -14,10 +14,18 @@ from PyQt6.QtCore import Qt
 
 from gui.main_window import MainWindow
 from gui.styles import GLOBAL_STYLESHEET
+from src.utils.logger import setup_logging, get_logger
+
+# Initialize logger
+logger = get_logger(__name__)
 
 
 def main():
     """Main entry point for the GUI application."""
+    # Setup logging
+    setup_logging(log_file_prefix="cse_gui")
+    logger.info("Starting CSE Stock Analyzer GUI")
+    
     # Enable High DPI scaling for better display on 4K monitors
     QApplication.setHighDpiScaleFactorRoundingPolicy(
         Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
@@ -42,7 +50,12 @@ def main():
     window.show()
     
     # Start event loop
-    sys.exit(app.exec())
+    # Start event loop
+    try:
+        sys.exit(app.exec())
+    except Exception as e:
+        logger.exception("GUI Application crashed")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

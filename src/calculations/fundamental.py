@@ -7,12 +7,13 @@ debt-to-equity ratio, and other financial metrics.
 """
 
 from src.utils.helpers import load_config, validate_positive_number, validate_non_negative_number
+from typing import Any, Dict, Optional
 
 
 class FundamentalAnalyzer:
     """Calculate and analyze fundamental stock metrics."""
     
-    def __init__(self, custom_config=None):
+    def __init__(self, custom_config: Optional[Dict[str, Any]] = None) -> None:
         """
         Initialize fundamental analyzer.
         
@@ -22,7 +23,7 @@ class FundamentalAnalyzer:
         self.config = custom_config if custom_config else load_config()
         self.thresholds = self.config['thresholds']
     
-    def calculate_pe_ratio(self, price, eps):
+    def calculate_pe_ratio(self, price: float, eps: float) -> Dict[str, Any]:
         """
         Calculate Price-to-Earnings (P/E) ratio.
         
@@ -90,7 +91,7 @@ class FundamentalAnalyzer:
             'benchmark_range': f"{pe_thresholds['fair_value_min']}-{pe_thresholds['fair_value_max']}"
         }
     
-    def calculate_pb_ratio(self, price, book_value_per_share):
+    def calculate_pb_ratio(self, price: float, book_value_per_share: float) -> Dict[str, Any]:
         """
         Calculate Price-to-Book (P/B) ratio.
         
@@ -143,7 +144,7 @@ class FundamentalAnalyzer:
             'rating': rating_map.get(recommendation, 'Fair')
         }
     
-    def calculate_roe(self, net_income, shareholders_equity):
+    def calculate_roe(self, net_income: float, shareholders_equity: float) -> Dict[str, Any]:
         """
         Calculate Return on Equity (ROE).
         
@@ -224,7 +225,7 @@ class FundamentalAnalyzer:
             'rating': rating_map.get(recommendation, 'Fair')
         }
     
-    def calculate_debt_to_equity(self, total_debt, shareholders_equity):
+    def calculate_debt_to_equity(self, total_debt: float, shareholders_equity: float) -> Dict[str, Any]:
         """
         Calculate Debt-to-Equity ratio.
         
