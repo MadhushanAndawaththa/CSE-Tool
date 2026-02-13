@@ -4,8 +4,9 @@
 
 **A powerful stock analysis toolkit for the Colombo Stock Exchange**
 
-[![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white)](https://python.org)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://python.org)
 [![PyQt6](https://img.shields.io/badge/PyQt6-Desktop_GUI-41CD52?logo=qt&logoColor=white)](https://www.riverbankcomputing.com/software/pyqt/)
+[![CI](https://github.com/MadhushanAndawaththa/CSE-Tool/actions/workflows/ci.yml/badge.svg)](https://github.com/MadhushanAndawaththa/CSE-Tool/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 Break-even calculations · Fee structure reference · Fundamental analysis · Technical indicators · Buy/Sell recommendations
@@ -56,7 +57,10 @@ Available as a **modern desktop GUI** (PyQt6) and a **feature-rich CLI**.
 - Weighted scoring combining **fundamental (60%)**, **technical (30%)**, and **risk (10%)** factors
 - Actionable recommendations: *Strong Buy / Buy / Hold / Sell / Strong Sell*
 - Risk assessment with confidence levels
-- Available via CLI (`python main.py` → option 3)
+- **PDF Report Generation**: Export beautiful analysis reports.
+- **CSV/Excel Export**: Save data for further analysis.
+- **Analysis History**: Auto-save and review past analyses (SQLite backed).
+- Available via GUI and CLI (`python main.py` → option 3)
 
 ### 🏦 CSE Fee Structure
 - Accurate **tiered fee calculation** matching official CSE rates
@@ -188,31 +192,27 @@ CSE-Tool/
 ├── main.py                  # CLI entry point
 ├── main_gui.py              # GUI entry point
 ├── config.yaml              # Fee rates, thresholds & weights
-├── requirements.txt         # Python dependencies
+├── pyproject.toml           # Project metadata & dependencies
+├── requirements.txt         # (Legacy) Python dependencies
+├── Makefile                 # Development task runner
+├── Dockerfile               # Container definition
 │
 ├── gui/                     # Desktop GUI (PyQt6)
-│   ├── main_window.py       # Main window, menus, toolbar, theme toggle
-│   ├── styles.py            # Stylesheets, color palette, dark mode styles
-│   └── tabs/
-│       ├── breakeven_tab.py
-│       ├── fees_tab.py
-│       ├── fundamental_tab.py
-│       ├── technical_tab.py
-│       └── complete_analysis_tab.py
+│   ├── main_window.py       # Main window orchestration
+│   ├── styles.py            # Stylesheets & themes
+│   └── tabs/                # Application modules (Break-even, Fees, Fundamental, Technical, Complete, History)
 │
 ├── src/                     # Core business logic
-│   ├── calculations/
-│   │   ├── breakeven.py     # Break-even & profit/loss engine
-│   │   ├── fundamental.py   # Fundamental ratio analysis
-│   │   └── technical.py     # RSI, MACD, MA indicators
-│   ├── analysis/
-│   │   └── recommendations.py  # Weighted scoring & recommendations
-│   ├── fees/
-│   │   └── cse_fees.py      # CSE fee calculation (tiered)
-│   └── utils/
-│       └── helpers.py       # Config loader, formatters, validators
+│   ├── analysis/            # Recommendation engine
+│   ├── calculations/        # Breakeven, Fundamental, Technical math
+│   ├── export/              # PDF, CSV, Excel generation
+│   ├── fees/                # CSE fee logic
+│   ├── storage/             # SQLite database manager
+│   └── utils/               # Helpers, Logging, Validation
 │
-└── data/                    # Data directory
+├── tests/                   # Unit tests (pytest)
+├── data/                    # Database & logs
+└── logs/                    # Application logs
 ```
 
 ---
