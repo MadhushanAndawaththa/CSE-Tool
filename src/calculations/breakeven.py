@@ -6,7 +6,6 @@ after accounting for all CSE trading fees and taxes.
 """
 
 from src.fees.cse_fees import CSEFeeCalculator
-from src.fees.cse_fees import CSEFeeCalculator
 from src.utils.helpers import validate_positive_number
 from typing import Any, Dict, Optional
 

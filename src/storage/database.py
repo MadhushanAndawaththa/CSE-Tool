@@ -6,7 +6,7 @@ Handles persistence of analysis results and retrieval of history.
 
 import sqlite3
 import json
-import os
+from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 from src.utils.logger import get_logger
@@ -27,10 +27,9 @@ class AnalysisDatabase:
             db_dir: Directory to store database file
             db_name: Name of the database file
         """
-        self.db_path = os.path.join(db_dir, db_name)
-        if not os.path.exists(db_dir):
-            os.makedirs(db_dir)
-            logger.info(f"Created data directory: {db_dir}")
+        db_path = Path(db_dir)
+        db_path.mkdir(parents=True, exist_ok=True)
+        self.db_path = db_path / db_name
             
         self._init_db()
         

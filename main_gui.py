@@ -50,7 +50,6 @@ def main():
     window.show()
     
     # Start event loop
-    # Start event loop
     try:
         sys.exit(app.exec())
     except Exception as e:
