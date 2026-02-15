@@ -1,4 +1,4 @@
-.PHONY: help install test lint run clean docker-build
+.PHONY: help install test lint run clean docker-build setup-hooks
 
 help:
 	@echo "CSE Stock Analyzer Makefile"
@@ -10,6 +10,7 @@ help:
 	@echo "make run-gui      Run GUI application"
 	@echo "make clean        Clean up build artifacts"
 	@echo "make docker-build Build Docker image"
+	@echo "make setup-hooks  Install pre-commit hooks"
 
 install:
 	pip install -e .[dev]
@@ -35,3 +36,8 @@ clean:
 
 docker-build:
 	docker build -t cse-stock-analyzer .
+
+setup-hooks:
+	pip install pre-commit
+	pre-commit install
+	@echo "Pre-commit hooks installed successfully!"
