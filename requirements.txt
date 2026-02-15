@@ -7,7 +7,6 @@ pyyaml>=6.0
 # CLI Dependencies
 tabulate>=0.9.0
 colorama>=0.4.6
-click>=8.1.0
 
 # PyQt6 GUI Dependencies
 PyQt6>=6.6.0
