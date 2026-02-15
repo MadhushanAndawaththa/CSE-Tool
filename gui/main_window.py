@@ -20,12 +20,10 @@ from gui.tabs.breakeven_tab import BreakEvenTab
 from gui.tabs.fees_tab import FeesTab
 from gui.tabs.fundamental_tab import FundamentalTab
 from gui.tabs.technical_tab import TechnicalTab
-from gui.tabs.technical_tab import TechnicalTab
 from gui.tabs.complete_analysis_tab import CompleteAnalysisTab
 from gui.tabs.history_tab import HistoryTab
 from gui.styles import GLOBAL_STYLESHEET, GLOBAL_STYLESHEET_DARK
 
-from src.export.pdf_report import generate_pdf_report
 from src.export.pdf_report import generate_pdf_report
 from src.export.csv_export import export_to_csv, export_to_excel
 from src.utils.logger import get_logger
