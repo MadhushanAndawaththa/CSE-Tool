@@ -6,8 +6,8 @@ logging to both a file and the console with appropriate formatting.
 """
 
 import logging
-import os
 import sys
+from pathlib import Path
 from datetime import datetime
 from typing import Optional
 
@@ -29,13 +29,13 @@ def setup_logging(
         log_file_prefix: Prefix for log files
     """
     # Create logs directory if it doesn't exist
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
+    log_dir_path = Path(log_dir)
+    log_dir_path.mkdir(parents=True, exist_ok=True)
     
     # Generate log filename with timestamp
     timestamp = datetime.now().strftime("%Y%m%d")
     log_filename = f"{log_file_prefix}_{timestamp}.log"
-    log_path = os.path.join(log_dir, log_filename)
+    log_path = log_dir_path / log_filename
     
     # Configure root logger
     logging.basicConfig(
