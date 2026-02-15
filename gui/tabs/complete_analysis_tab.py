@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
     QFrame, QGridLayout, QScrollArea, QGroupBox, QLineEdit, QTextEdit,
     QTableWidget, QTableWidgetItem, QSplitter, QSizePolicy
 )
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QDoubleValidator
 
 from gui.styles import (
@@ -22,6 +22,28 @@ from src.storage.database import AnalysisDatabase
 from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
+
+
+class _AnalysisWorker(QThread):
+    """Background worker that runs the recommendation engine off the main thread."""
+
+    finished = pyqtSignal(dict)   # emits the result dict
+    error = pyqtSignal(str)       # emits the error message
+
+    def __init__(self, engine, stock_data, prices=None):
+        super().__init__()
+        self.engine = engine
+        self.stock_data = stock_data
+        self.prices = prices
+
+    def run(self):
+        try:
+            result = self.engine.generate_recommendation(
+                self.stock_data, prices=self.prices if self.prices else None
+            )
+            self.finished.emit(result)
+        except Exception as e:
+            self.error.emit(str(e))
 
 
 class CompleteAnalysisTab(QWidget):
@@ -378,14 +400,21 @@ class CompleteAnalysisTab(QWidget):
         # Parse historical prices
         prices = self._parse_prices()
 
-        # Run the engine
-        try:
-            result = self.engine.generate_recommendation(stock_data, prices=prices if prices else None)
-        except Exception as e:
-            logger.error(f"Analysis failed: {e}")
-            self._show_msg("Analysis Error", f"An error occurred during analysis:\n{e}")
-            return
-            
+        # Disable button and show progress
+        self.analyze_btn.setEnabled(False)
+        self.analyze_btn.setText("Analyzing...")
+
+        # Run the engine on a background thread
+        self._worker = _AnalysisWorker(self.engine, stock_data, prices)
+        self._worker.finished.connect(self._on_analysis_finished)
+        self._worker.error.connect(self._on_analysis_error)
+        self._worker.start()
+
+    def _on_analysis_finished(self, result):
+        """Handle successful analysis result from worker thread."""
+        self.analyze_btn.setEnabled(True)
+        self.analyze_btn.setText("Run Complete Analysis")
+
         # Save result to database
         try:
             self.db.save_analysis(result)
@@ -395,6 +424,13 @@ class CompleteAnalysisTab(QWidget):
 
         # Update the dashboard with real results
         self._display_results(result)
+
+    def _on_analysis_error(self, error_msg):
+        """Handle analysis error from worker thread."""
+        self.analyze_btn.setEnabled(True)
+        self.analyze_btn.setText("Run Complete Analysis")
+        logger.error(f"Analysis failed: {error_msg}")
+        self._show_msg("Analysis Error", f"An error occurred during analysis:\n{error_msg}")
 
     # ── Display results on dashboard ───────────────────────
     def _display_results(self, result):
