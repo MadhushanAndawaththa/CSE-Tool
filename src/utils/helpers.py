@@ -3,11 +3,13 @@ Utility functions and configuration loader for CSE Stock Analyzer.
 """
 
 import yaml
+from functools import lru_cache
 from pathlib import Path
 
 
+@lru_cache(maxsize=1)
 def load_config() -> dict:
-    """Load configuration from config.yaml file."""
+    """Load configuration from config.yaml file (cached after first call)."""
     config_path = Path(__file__).parent.parent.parent / 'config.yaml'
     
     try:
