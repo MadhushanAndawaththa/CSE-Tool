@@ -29,9 +29,9 @@ Available as a **modern desktop GUI** (PyQt6) and a **feature-rich CLI**.
 
 | Light Mode | Dark Mode |
 |:---:|:---:|
-| *Launch with `python main_gui.py`* | *Toggle via toolbar or View menu* |
+| ![Light Mode](docs/screenshots/light_mode.png) | ![Dark Mode](docs/screenshots/dark_mode.png) |
 
-> Screenshots coming soon. Clone the repo and run `python main_gui.py` to see it in action.
+> Toggle dark mode instantly from the toolbar ☀️/🌙 button or **View → Dark Mode**.
 
 ---
 
