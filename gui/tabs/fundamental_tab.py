@@ -5,7 +5,7 @@ Fundamental Analysis tab for CSE Stock Analyzer GUI.
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QGroupBox,
     QLabel, QLineEdit, QPushButton, QTableWidget, QTableWidgetItem,
-    QMessageBox
+    QMessageBox, QScrollArea, QSizePolicy
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QDoubleValidator
@@ -49,9 +49,19 @@ class FundamentalTab(QWidget):
         content = QHBoxLayout()
         content.setSpacing(12)
         content.setContentsMargins(0, 0, 0, 0)
+
+        # Wrap input panel in a scroll area so it never clips at any window size
         input_panel = self._build_input_panel()
-        input_panel.setMinimumWidth(320)  # Ensure input panel doesn't get too narrow
-        content.addWidget(input_panel, 1)
+        scroll = QScrollArea()
+        scroll.setWidget(input_panel)
+        scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scroll.setMinimumWidth(320)
+        scroll.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
+        scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+        content.addWidget(scroll, 1)
+
         self.results_panel = self._build_results_panel()
         content.addWidget(self.results_panel, 1)
         main_layout.addLayout(content, 1)
@@ -109,7 +119,6 @@ class FundamentalTab(QWidget):
         grid.addWidget(btn_widget, r, 0, 1, 2)
 
         group.setLayout(grid)
-        group.setMinimumHeight(420)
         return group
 
     # ── results panel ─────────────────────────────────────────────────
