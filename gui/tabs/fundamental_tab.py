@@ -90,6 +90,7 @@ class FundamentalTab(QWidget):
         r = len(fields)
         btn_row = QHBoxLayout()
         btn_row.setSpacing(8)
+        btn_row.setContentsMargins(0, 4, 0, 0)
 
         self.analyze_btn = QPushButton("Analyze")
         self.analyze_btn.clicked.connect(self.analyze)
@@ -107,9 +108,8 @@ class FundamentalTab(QWidget):
         btn_widget.setLayout(btn_row)
         grid.addWidget(btn_widget, r, 0, 1, 2)
 
-        grid.setRowStretch(r + 1, 1)
         group.setLayout(grid)
-        group.setMinimumHeight(380)  # Ensure enough height for all inputs + buttons
+        group.setMinimumHeight(420)
         return group
 
     # ── results panel ─────────────────────────────────────────────────
