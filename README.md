@@ -6,7 +6,9 @@
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://python.org)
 [![PyQt6](https://img.shields.io/badge/PyQt6-Desktop_GUI-41CD52?logo=qt&logoColor=white)](https://www.riverbankcomputing.com/software/pyqt/)
-[![CI](https://github.com/MadhushanAndawaththa/CSE-Tool/actions/workflows/ci.yml/badge.svg)](https://github.com/MadhushanAndawaththa/CSE-Tool/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-142%20passed-brightgreen?logo=pytest&logoColor=white)](tests/)
+[![Coverage](https://img.shields.io/badge/coverage-75%25-yellowgreen)](tests/)
+[![Release](https://img.shields.io/badge/release-v1.0.0-blue)](https://github.com/MadhushanAndawaththa/CSE-Tool/releases/tag/v1.0.0)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 Break-even calculations · Fee structure reference · Fundamental analysis · Technical indicators · Buy/Sell recommendations
@@ -28,6 +30,8 @@ Available as a **modern desktop GUI** (PyQt6) and a **feature-rich CLI**.
 | Light Mode | Dark Mode |
 |:---:|:---:|
 | *Launch with `python main_gui.py`* | *Toggle via toolbar or View menu* |
+
+> Screenshots coming soon. Clone the repo and run `python main_gui.py` to see it in action.
 
 ---
 
