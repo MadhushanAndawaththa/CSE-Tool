@@ -230,7 +230,6 @@ CSE-Tool/
 | `qtawesome` | Font Awesome icons |
 | `tabulate` | CLI table formatting |
 | `colorama` | CLI colored output |
-| `click` | CLI argument parsing |
 
 > **Optional:** `pyqtdarktheme` — enhanced dark mode (may not work on Python 3.12+; the app has a built-in QPalette fallback)
 
