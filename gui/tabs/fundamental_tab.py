@@ -88,15 +88,24 @@ class FundamentalTab(QWidget):
             grid.addWidget(inp, r, 1)
 
         r = len(fields)
+        btn_row = QHBoxLayout()
+        btn_row.setSpacing(8)
+
         self.analyze_btn = QPushButton("Analyze")
         self.analyze_btn.clicked.connect(self.analyze)
-        grid.addWidget(self.analyze_btn, r, 0, 1, 2)
+        self.analyze_btn.setMinimumHeight(32)
 
-        r += 1
         clear_btn = QPushButton("Clear")
         clear_btn.setProperty("buttonStyle", "secondary")
         clear_btn.clicked.connect(self.clear_inputs)
-        grid.addWidget(clear_btn, r, 0, 1, 2)
+        clear_btn.setMinimumHeight(32)
+
+        btn_row.addWidget(self.analyze_btn)
+        btn_row.addWidget(clear_btn)
+
+        btn_widget = QWidget()
+        btn_widget.setLayout(btn_row)
+        grid.addWidget(btn_widget, r, 0, 1, 2)
 
         grid.setRowStretch(r + 1, 1)
         group.setLayout(grid)
