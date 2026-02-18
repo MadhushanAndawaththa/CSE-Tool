@@ -95,7 +95,6 @@ class MainWindow(QMainWindow):
         self.fees_tab = FeesTab()
         self.fundamental_tab = FundamentalTab()
         self.technical_tab = TechnicalTab()
-        self.technical_tab = TechnicalTab()
         self.complete_tab = CompleteAnalysisTab()
         self.history_tab = HistoryTab()
 
@@ -210,15 +209,6 @@ class MainWindow(QMainWindow):
             tab.clear_inputs()
             self.status_bar.showMessage("Cleared inputs", 3000)
 
-    def export_results(self):
-        msg = QMessageBox(self)
-        msg.setWindowTitle("Export")
-        msg.setText("Export will be available in a future update.")
-        msg.setIcon(QMessageBox.Icon.Information)
-        if self.dark_mode:
-            msg.setStyleSheet("QLabel { color: #e2e4e7; } QMessageBox { background: #1e293b; }")
-        msg.exec()
-
     def show_about(self):
         msg = QMessageBox(self)
         msg.setWindowTitle("About CSE Stock Analyzer")
@@ -280,7 +270,6 @@ class MainWindow(QMainWindow):
         else:
             app.setPalette(self.style().standardPalette())  # type: ignore
             app.setStyleSheet(GLOBAL_STYLESHEET)  # type: ignore
-        self.dark_mode = dark_mode
         self.dark_mode = dark_mode
         for tab in [self.breakeven_tab, self.fees_tab, self.fundamental_tab,
                      self.technical_tab, self.complete_tab, self.history_tab]:
