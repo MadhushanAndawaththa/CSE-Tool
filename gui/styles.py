@@ -285,6 +285,17 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
     height: 0;
 }}
 
+QScrollArea {{
+    background: {BG};
+    border: none;
+}}
+QScrollArea > QWidget > QWidget {{
+    background: {BG};
+}}
+QScrollArea QGroupBox {{
+    background: {SURFACE};
+}}
+
 QGroupBox {{
     border: 1px solid {BORDER};
     border-radius: 8px;
@@ -396,6 +407,17 @@ QToolButton:pressed, QToolButton:checked {{
 
 GLOBAL_STYLESHEET_DARK = f"""
 QMainWindow {{ background: {_D_BG}; }}
+
+QScrollArea {{
+    background: {_D_BG};
+    border: none;
+}}
+QScrollArea > QWidget > QWidget {{
+    background: {_D_BG};
+}}
+QScrollArea QGroupBox {{
+    background: {_D_SURFACE};
+}}
 
 #HeaderBar {{
     background: qlineargradient(x1:0,y1:0,x2:1,y2:0,
